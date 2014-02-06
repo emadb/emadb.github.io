@@ -1,0 +1,20 @@
+---
+comments: true
+date: 2011-09-20 16:56:20
+layout: post
+slug: wpc-2011
+title: WPC 2011
+wordpress_id: 124
+categories:
+- Talk, conferenze e workshop
+---
+
+![](http://www.wpc2011.it/images/media/b1_300x250.jpg)
+
+La [WPC](http://wpc2011.it/) è considerata a livello italiano la conferenza piu importante per chi sviluppa su piattaforma Microsoft, da 18 anni numerosi speaker hanno tenuto interessanti sessioni sullo sviluppo, sull'infrastruttura e sulla sicurezza.
+Quest'anno anche io faro parte della rosa di speaker con una sessione intitolata "[Test Driving an ASP.NET MVC Application](http://wpc2011.it/sessions.aspx?sId=20)",  tema a me molto caro.
+Cosa vedremo?
+
+Vorrei dare alla sessione un taglio molto pratico, sul TDD si e detto tantissimo quindi vorrei evitare di ripetere ancora le solite cose per dedicarmi alla parte pratica mostrando come funziona realmente il TDD su una vera applicazione.
+
+Quindi poche slide, tanto codice, tante barre verdi e rosse e spero tante domande e interazione con chi parteciperà.

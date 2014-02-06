@@ -1,0 +1,65 @@
+---
+layout: default
+title: Emanuele DelBono
+---
+
+<div id="home" class="row">
+<div class="col-md-9">
+<div class="row bio">
+  <div class="col-md-4">
+    <div class="avatar">
+    </div>
+  </div>
+  <div class="col-md-8">
+        <h2>
+          Emanuele Del Bono
+        </h2>
+        <ul class="list-inline tags">
+          <li>
+            <a href="https://twitter.com/emadb">
+              Twitter
+            </a>
+          </li>
+          <li>
+            <a href="http://www.linkedin.com/in/emanueledb">
+              Linkedin
+            </a>
+          </li>
+          <li>
+            <a href="http://www.slideshare.net/emadb">
+              Slideshare
+            </a>
+          </li>
+          <li>
+            <a href="http://www.github.com/emadb">
+              Github
+            </a>
+          </li>
+        </ul>
+      
+      <p>
+        I am an architect and software developer with more than 10 years' experience in building web applications. I have always been curious and interested in learning new technologies and new languages, and over the last few years I have spent my time in frontend development, taking in my stride the quirks of javascript and different browser personalities. </p>
+        <p>C#, Ruby, Javascript, Test Driven Development, Patterns and Clean Code are the languages and practices I speak every day. I love to share what I learn, actively participating in conferences as a speaker at numerous events for various developer communities. But I don’t just live for technology: in my spare time I really enjoy freshwater sailing on Lake Garda and being a "perfect dad".
+      </p>
+  </div>
+</div>
+  
+  </div>
+  <div class="col-md-3">
+    <div class="right-panel">
+      <h3>Recent Posts</h3>
+      <ul class="recent-posts">
+        {% for post in site.posts offset: 0 limit: 5  %}
+        <li>
+          <a href="{{ post.url }}">{{ post.title }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  
+
+</script>

@@ -1,0 +1,41 @@
+---
+comments: true
+date: 2012-06-14 07:01:56
+layout: post
+slug: node-js
+title: Node.js
+wordpress_id: 357
+categories:
+- nodejs
+---
+
+Node.js è il framework del momento, nato solo 3 anni fa, in poco tempo ha suscitato entusiasmo nella community degli sviluppatori fino a farlo diventare un framework diffuso al punto che anche Microsoft, di solito distante a queste novità, ha deciso di supportarlo e ha aiutato il team ad effettuare il porting su windows.
+
+Cos'è esattamente Node.js?
+
+<!-- more -->
+
+In parole povere è "javascript che gira sul server", più esattamente è un framework per scrivere applicazioni web scalabili in javascript basasto sull'engine Google V8.
+
+Perchè Javascript? (con tutti i bei linguaggi che ci sono?)
+
+Perchè javascript non aveva nessuna libreria per l'I/O e questo ha permesso a Dahl (lo sviluppatore che ha scritto node.js) di definire l'API per l'I/O in modo non bloccante ed event-driven che rappresenta la caratteristica peculiare di node.js.
+
+L'hello world di node.js è questo:
+`var http = require('http');
+http.createServer(function (request, response) {
+ response.writeHead(200, {'Content-Type': 'text/plain'});
+ response.end('Hello World\n');
+}).listen(8080);`
+Queste poche righe di codice instanziano un server http che resta in ascolto sulla porta 8080. Per vederlo in azione, dopo aver installato node, basta avviarlo dal command prompt scrivendo:
+`node app.js`
+dove app.js è il file che contiene il codice sopra. Aprendo il browser e inserendo l'url http://localhost:8080 il server risponderà con la scritta "Hello world".
+
+La cosa interessante è che le app node.js sono autocontenute, ci0è non si appoggiano su un server sono loro stesse un server http.
+
+Cosa si può fare con node.js?
+
+Applicazioni web! Tramite l'aggiunta di particolari moduli (express, mongoose, sqlserver,...)  si possono sviluppare applicazioni web alla "ASP.NET MVC", anche se il suo punto forte non è quello.
+
+Le sue potenzialità sono nel supporto alle applicazioni real-time tramite websockets ad esempio o ad applicazioni che necessitano di funzionalità push. Ne riparliamo...
+
