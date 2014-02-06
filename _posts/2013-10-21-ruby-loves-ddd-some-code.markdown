@@ -9,7 +9,7 @@ categories: ruby
 My experiments with Ruby and Domain Driven Implementation continues. Two weeks ago I was at the [Rupy](http://13.rupy.eu) conf talking about Domain Driven Architectures in Ruby.
 The code is available on [Github](http://github.com/emadb/ruby_loves_ddd) and I would like to show you how it works with these small series of post on the topic.
 
-<!-- more -->
+
 
 To understand how it works, the best place to start is the test in the file fake_controller.rb.
 

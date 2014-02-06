@@ -11,7 +11,7 @@ Sempre più spesso ci capita di realizzare applicazioni web multilingua e questo
 ASP.NET MVC ha già integrato un meccanismo di localizzazione basato sulle DataAnnotation dei model, ossia possiamo attribuire ad ogni model la sua descrizione basata sulla lingua impostata.
 
 
-<!-- more -->
+
 Ad esempio:
 
 

@@ -13,7 +13,7 @@ Il binding con proprietà scalari è semplice, ma come ci si comporta con le lis
 Knockout mette a disposizione il concetto di observableArray che, come la cara vecchia ObservableCollection, permette di tenere sotto controllo gli elementi presenti nella collezione ed accorgersi  dei cambiamenti.
 Vediamo un esempio per capire come usarle.
 
-<!-- more -->
+
 Anche in questo caso se avete già lavorato con WPF/Silverlight sarete aiutati grazie alle numerose analogie.
 
     function ProductViewModel(desc, qta) {

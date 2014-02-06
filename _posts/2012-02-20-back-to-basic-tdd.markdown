@@ -17,8 +17,6 @@ Sicuramente la sua difficoltà principale è nell'imparare a farlo con profitto,
 
 In questo post voglio riassumere quello che secondo me il TDD insegna.
 
-<!-- more -->
-
 
 ## Pensa poi scrivi
 

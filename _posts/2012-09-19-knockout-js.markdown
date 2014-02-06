@@ -11,7 +11,7 @@ La moda dei framework javascript è esplosa, esistono [decine di librerie MVQual
 
 Una bella sorpresa! Se venite dal mondo WPF/Silverlight trovate in knockout molti dei concetti a cui eravate abituati e gli scogli iniziali sono facilmente superati.
 
-<!-- more -->
+
 
 Knockout implementa il pattern MVVM, in javascript. Il model è rappresentato dai dati che arrivano dal server, a differenza di Backbone però i dati ve li dovete caricare voi facendo le chiamate ajax con Jquery o meglio ancora con il nuovissimo framework [vanilla.js](http://vanilla-js.com) ;-).
 

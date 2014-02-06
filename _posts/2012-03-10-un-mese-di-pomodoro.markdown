@@ -18,7 +18,7 @@ Cosi abbiamo deciso di provare seriamente [per un mese](http://www.ted.com/talks
 
 Com'è andato questo mese?
 
-<!-- more -->
+
 
 Ho fatto 82 pomodori (interi), nei primi giorni ne facevo 5-6 interi poi sono migliorato arrivando a 10-12 pomodori al giorno che vi garantisco non sono male. La cosa che mi ha dato più valore è la lista giornaliera delle attività, quella è veramente utilissima e permette di non scordare le cose da fare e soprattutto di rimanere focalizzati sulle cose che vanno fatte tralasciando o posticipando quelle meno importanti. Nella mia lista dei task ci sono anche pomodori dedicati a rispondere alle email, alla fatturazione, alle riunioni interne al team....quindi ogni tipo di attività è stata tracciata e misurata.
 

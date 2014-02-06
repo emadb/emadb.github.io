@@ -15,7 +15,7 @@ Tornando al codice della puntata precedente, quello che mi viene da chiedere al 
 
 _nda: ho visto che i vari siti di ecommerce si comportano in modo diverso, per alcuni il numero di item nel carrello è il numero di prodotti univoci per altri è il numero di articoli presenti._
 
-<!-- more -->
+
 
 Per il nostro esempio il product owner ci dice che aggiungere 2 volte lo stesso articolo non fa aumentare il numero degli item, ma la quantità dello stesso (gestiremo la quantità successivamente).
 

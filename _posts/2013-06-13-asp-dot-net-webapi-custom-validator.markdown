@@ -7,7 +7,7 @@ categories:
 ---
 I'm using [ASP.NET WebApi](http://www.asp.net/web-api) for some months and even if I like them everytime I have to dig into the source code to understand some not_so_well_documented feature I'm impressed about the complexity of the implementation.
 One case is the Model Binding mechanism that has at least three different complicated ways of doing a quite simple thing, another is the creation of CustomValidators, where even Google doesn't help so much.
-<!-- more -->
+
 
 What I had to do is to build a model validator that has a dependency on an external service to verify certain conditions.
 

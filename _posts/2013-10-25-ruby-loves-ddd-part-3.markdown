@@ -7,7 +7,7 @@ categories:
 ---
 
 In the last [post](http://ema.codiceplastico.com/blog/2013/10/21/ruby-loves-ddd-some-code/) we saw how the controller issue a command to the pipeline, now we will see how this command in managed.
-<!-- more -->
+
 The CommandExecutor finds the handler for the given commmand. In our case the command was `AddToBasketCommand` and the relative handler is `AddToBasketHandler`.
 The code is here:
 

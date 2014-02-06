@@ -19,7 +19,6 @@ C'è un filo di dispiacere come per ogni cosa che finisce ma io, [Simone](http:/
 
 UgiALT.net è nata nel 2008, ricordo che nella prima conf eravamo circa una dozzina, [Simone](http://codeclimber.net.nz/) ci spiegava il nuovo ASP.NET MVC e [Antonio](http://blogs.ugidotnet.org/antonioganci/) ci parlava di metriche del codice, pochi ma molto attivi e con interessanti discussioni.
 
-<!-- more -->
 
 Così è nato il gruppo e negli anni è cresciuto tanto dal punto di vista della partecipazione alle conferenze ma non è mai cresciuto dal punto di vista della community visto che a "fare le cose" siamo sempre rimasti in 3. Non c'è polemica, davvero, sappiamo bene che il tempo è sempre meno di quello che si crede e l'organizzazione di una conferenza ne richiede parecchio e chi sceglie di farlo è perché ha una propensione naturale per questo tipo di attività e lo fa divertendosi senza volere ritorni. Poi però un giorno ci si sveglia stanchi e si comincia a pensare ad altri modi per riempire il tempo libero e si devono abbandonare alcune cose a favore di altre.
 

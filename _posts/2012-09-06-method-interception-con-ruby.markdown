@@ -13,7 +13,7 @@ Una delle cose che in .NET non è fattibile in modo semplice è l'intercettazion
 
 In Ruby la cosa è di una semplicità e naturalezza disarmante.
 
-<!-- more -->
+
 Supponiamo di avere una classe fatta in questo modo:
 
     class MyService

@@ -15,7 +15,7 @@ Insegnando il TDD un problema che vedo emergere subito è quello del primo test.
 
 Vi racconto come procedo io, sperando possa esservi d'aiuto.
 
-<!-- more -->
+
 
 Parto sempre da una storia che traduco in un test d'accettazione che altro non è che un test end-to-end che coinvolge tutto lo stack applicativo e che rimane rosso per un periodo più lungo di un normale unit-test.
 

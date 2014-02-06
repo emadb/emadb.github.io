@@ -9,7 +9,7 @@ The more I explore Open Source world the more I ask myself why web developers ar
 
 I know that some of my friends will not agree with what I'm writing, but I invite them to give a try to another platform without pre-conception, just to explore alternatives in web development.
 
-<!-- more -->
+
 
 Many of you know that have been some year that I'm investigating in different programming languages and platforms. It started some years ago with [Ruby](https://www.ruby-lang.org/), at the time of the [Ruby On Rails](http://rubyonrails.org/) hype, just to understand why so many people were so exited about Rails.
 I was very skeptical, I thought that an interpreted dynamic language could not be used in a real web application. I was wrong.  I suddenly fall in love with Ruby (the programming language!) that I still use today for almost any non-related-to-work project.

@@ -26,7 +26,7 @@ Come utente che sta navigando sul sito posso aggiungere un articolo nel carrello
       cart.AddItem(99);
       Assert.Equal(1, cart.ItemCount);
     }
-<!-- more -->
+
 
 Questo semplice test che può risultare perfino banale ma ci permette di posare la prima pietra e ci obbliga a decidere alcune cose: il nome delle classi in gioco e una prima parte di interfaccia che, in questo caso la classe ShoppingCart, dovrà esporre.
 

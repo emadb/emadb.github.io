@@ -6,7 +6,7 @@ comments: true
 categories: ita
 ---
 Sono freelance da parecchi anni e dalla prima fattura emessa ho sempre avuto la necessità di avere un "programmino" per gestire la contabilità. Il primo me lo sono scritto in Access, poi con [CodicePlastico](http://codiceplastico.com) è nata l'esigenza di qualcosa di più evoluto e con [Alessandro](http://melkio.codiceplastico.com) abbiamo scritto una mini applicazione web che, seppur grezza, ci ha aiutato per quasi 3 anni. Non avendo esperienza in campo amministrativo l'applicazione è nata sulle nostre esigenze di allora e in 3 anni sono cambiate tante cose e l'app sviluppata aveva bisogno di una profonda review. 
-<!-- more -->
+
 Quindi l'anno scorso abbiamo deciso di provare a riscriverla per avere oltre all'emissione delle fatture qualcosa di più. Così è nato Scrooge, una web app scritta in Rails che usiamo da inizio anno con discreta soddisfazione.
 Ad oggi supporta la _fatturazione attiva_ e _passiva_, la _gestione dei clienti_ (tramite active admin), la _gestione delle attività_ e delle _commesse/progetti_ e l'_integrazione con dropbox_ per lo storage delle fatture. Inoltre ha una semplice _dashboard_ per avere a colpo d'occhio la situazione economica.
 

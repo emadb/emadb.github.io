@@ -13,7 +13,7 @@ Node.js è il framework del momento, nato solo 3 anni fa, in poco tempo ha susci
 
 Cos'è esattamente Node.js?
 
-<!-- more -->
+
 
 In parole povere è "javascript che gira sul server", più esattamente è un framework per scrivere applicazioni web scalabili in javascript basasto sull'engine Google V8.
 

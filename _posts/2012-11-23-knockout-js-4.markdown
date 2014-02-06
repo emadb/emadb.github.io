@@ -8,7 +8,7 @@ wordpress_id: 473
 ---
 
 Talvolta è necessario intercettare le operazioni di set fatte da una proprietà in binding per notificare altri viewmodel del cambiamento. Il parallelo con WPF è quando a fronte di un set di un attributo del viewmodel voglio avvisare un altro viewmodel del cambiamento usando un MessageBroker in memoria.
-<!-- more -->
+
 La stessa cosa può essere fatta con knockout.js sfruttando un estensione degli attributi observable che ci permettono di intercettare i cambiamenti:
 
     function ProductViewModel(desc, qta) {

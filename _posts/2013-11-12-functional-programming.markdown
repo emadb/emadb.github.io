@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "functional programming"
+title: "Functional programming"
 date: 2013-11-12 14:53
 comments: true
 categories: 
@@ -8,7 +8,6 @@ categories:
 
 In the last year Functional Programming is the topic that devs are talking about. Many functional languages are becoming popular ([Scala](http://www.scala-lang.org/), [F#](http://www.tryfsharp.org/), [Clojure](http://clojure.org/), [Elixir](http://elixir-lang.org/) and someone is starting to say that functional programming will be the next big thing.
 As usual as a curious guy I started to study the fundamentals and theories behind functional programming and I must admit that most of the time we are using the wrong language to resolve our daily problems.
-<!-- more -->
 
 Object Oriented Languages is useful when you have a state to persist (as in a GUI application)  but in other cases you don’t need it. Consider a web app. The server side could be just a series of functions that respond to the HTTP commands that arrives from the clients.
 

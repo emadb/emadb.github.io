@@ -7,7 +7,7 @@ categories: [rails]
 ---
 Utlimamente mi è capitato di dover integrare un'applicazione rails con [dropbox](http://www.dropbox.com), in particolare l'applicazione genera un PDF che deve essere salvato su dropbox.
 Ho deciso di utilizzare la gemma [dropbox-api](http://github.com/RISCfuture/dropbox) invece di quella ufficiale perchè leggendo alcuni articoli in rete mi è sembrata meno a basso livello e più facilmente utilizzabile.
-<!-- more -->
+
 La prima cosa da fare è andare sul sito [www.dropbox.com/developers](https://www.dropbox.com/developers) e creare una nuova applicazione ottenendo le chiavi necessarie per configurare l'accesso.
 Dopo aver aggiunto la gemma al gemfile rails e dopo averla installata tramite bundler ci si trova un task rake per ottenere le key di accesso all'applicazione:
 

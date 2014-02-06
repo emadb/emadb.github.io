@@ -8,7 +8,7 @@ wordpress_id: 438
 ---
 
 Nel precedente [articolo](http://blog.codiceplastico.com/ema/?p=414) abbiamo visto come mettere in binding una collezione di oggetti con una table, oggi riprendiamo l'esempio per aggiungere una funzionalità: vogliamo fare in modo che se la quantità di un prodotto è uguale a zero, la riga venga visualizzata in modo diverso (ad esempio mostrando un link per poterne ordinare altri).
-<!-- more -->
+
 Un modo per implementare la richiesta è quello di utilizzare i [template](http://knockoutjs.com/documentation/template-binding.html) che funzionano più o meno come di DataTemplate di WPF/Silverlight (sebbene siano meno "potenti").
 
 In realtà se la differente visualizzazione implica solo l'applicazione di uno stile particolare o di un CSS si può usare il binding per valorizzare questi attributi, nel nostro caso però vogliamo che la struttura cambi nei due casi.

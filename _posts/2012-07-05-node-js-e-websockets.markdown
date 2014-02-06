@@ -13,7 +13,7 @@ tags:
 
 Uno degli ambiti in cui [Node.js](http://nodejs.org/) si trova a suo perfetto agio è nei contesti in cui è necessaria un'alta reattività dei componenti in gioco. Il classico esempio che viene riportato nei tutorial di Node.js è l'implementazione di una chat, in cui i client non fanno polling ma vengono notificati direttamente dal server della presenza di un nuovo messaggio.
 
-<!-- more -->
+
 
 Com'è possibile ciò?
 

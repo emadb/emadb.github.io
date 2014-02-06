@@ -6,7 +6,7 @@ comments: true
 categories: 
 ---
 In the last [post](http://ema.codiceplastico.com/blog/2013/10/25/ruby-loves-ddd-part-3/) we saw how it is implemented a command handler and how it interacts with the aggregate.
-<!-- more -->
+
 The first task that we did was to get the aggregate from the event store.
 Remember that in an EventSource architecture that status of the objects (the aggregates) must be rebuilt executing every event that the object had received from its beginning. This means that the repository load a series of events (given the aggreate id) an apply all the events to the aggregate root to obtain the current state:
 
