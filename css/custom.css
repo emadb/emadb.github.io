@@ -157,4 +157,7 @@ p{
 .avatar:hover{
     background-image: url('/images/ema2.gif');    
 }
+p > a{
+    text-decoration: underline;
+}
 

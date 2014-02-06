@@ -7572,7 +7572,7 @@ h6 {
 
 /* line 50, ../base/_theme.scss */
 a {
-  color: black !important;
+  color: black;
 }
 /* line 55, ../base/_theme.scss */
 a:hover, a:focus {
