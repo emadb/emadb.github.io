@@ -68,7 +68,6 @@ body
     background-image: -moz-linear-gradient(bottom, #f04031 25%, #F26130 82%);
     background-image: -webkit-linear-gradient(bottom, #f04031 25%, #F26130 82%);
     background-image: -ms-linear-gradient(bottom, #f04031 25%, #F26130 82%);
-
 }​
 ul.posts li:first-child + li{
     margin-top: 70px;
@@ -144,6 +143,7 @@ p{
 
 .bio{
     margin-top: 50px;
+    background: url('/images/ema2.gif') no-repeat -9999px -9999px; 
 }
 .avatar{
     margin-top: 20px;
