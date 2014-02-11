@@ -27,4 +27,4 @@ The interesting part for today is the call to commit. Inside that method, implem
  
 
 The code is very simple, it enumerates all the events and send them to the eventually subscribed objects (we will came back on this) and store the event in the database (or whatever will be).
-Since everything is already done, the task of commit is to store the events in the appropriate storage. The storage is an append-only list of events that are marked with the aggregate id and it’s the same list that we used to reload the aggregate (http://ema.codiceplastico.com/blog/2013/12/26/ruby-loves-ddd-part-4/).
+Since everything is already done, the task of commit is to store the events in the appropriate storage. The storage is an append-only list of events that are marked with the aggregate id and it’s the same list that we used to reload the aggregate [http://ema.codiceplastico.com/blog/2013/12/26/ruby-loves-ddd-part-4/](http://ema.codiceplastico.com/blog/2013/12/26/ruby-loves-ddd-part-4/)
