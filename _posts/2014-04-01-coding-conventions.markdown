@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Coding Convention"
+title: "Coding Conventions"
 date: 2014-04-01
 comments: true
 categories:
