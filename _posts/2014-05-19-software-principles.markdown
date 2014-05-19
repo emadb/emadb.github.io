@@ -18,3 +18,5 @@ So what remains of them?
 
 
 Thats why the developers should spend more time on learning the principles than on learning how to use a framework, because in every framework the principles remains valid and *good software is built on good principles*.
+
+So it's time to go back to SOLID, KISS, DRY, YAGNI and so on....
