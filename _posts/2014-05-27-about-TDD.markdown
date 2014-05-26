@@ -10,17 +10,17 @@ In these days everybody talks about TDD due to the [post](http://david.heinemeie
 I’m a proponent of TDD, I teach TDD and I practice it for 5 years even if I’m not a fanatic and I don’t do TDD all the time. But I like it, and I gain value from applying TDD in my projects.
 Why?
 
-- With TDD I can broke up my story in small tasks and every time I add a test and it became green I’m moving towards the final implementation. One test is equivalent to a small functionality. 
+* With TDD I can broke up my story in small tasks and every time I add a test and it became green I’m moving towards the final implementation. One test is equivalent to a small functionality. 
 
-- TDD force me to deeply think at what the customer wants. If I’m not sure what the customer needs I can’t even write a test so I’m forced to ask more informations that I will use to write the tests and then the implementation.
+* TDD force me to deeply think at what the customer wants. If I’m not sure what the customer needs I can’t even write a test so I’m forced to ask more informations that I will use to write the tests and then the implementation.
 
-- Using TDD I’m indirectly creating a test suite that I can run every time I need feedback on the status of my codebase.
+* Using TDD I’m indirectly creating a test suite that I can run every time I need feedback on the status of my codebase.
 
-- TDD let you design your classes in a simpler way. Since the tests are naturally simple, the tested code is by default simple too.
+* TDD let you design your classes in a simpler way. Since the tests are naturally simple, the tested code is by default simple too.
 
-- TDD let me think at my code from the user perspective, this means that the first things that I do is to design the interface of my method: I define the name, the return type and the parameters without caring at the implementation. This results in a cleaner interface.
+* TDD let me think at my code from the user perspective, this means that the first things that I do is to design the interface of my method: I define the name, the return type and the parameters without caring at the implementation. This results in a cleaner interface.
 
-- TDD let you do extreme refactoring without worries about breaking the functionalities. Can you really refactor your code without the tests?
+* TDD let you do extreme refactoring without worries about breaking the functionalities. Can you really refactor your code without the tests?
 
 
 By looking at the list above you can see that TDD is more about *design* that about testing, the tests are a welcome side effects and TDD really helps you in design orthogonal classes that respect the OOP principles.
