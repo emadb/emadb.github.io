@@ -22,11 +22,13 @@ Why?
 
 - TDD let you do extreme refactoring without worries about breaking the functionalities. Can you really refactor your code without the tests?
 
-By looking at the list above you can see that TDD is more about **design** that about testing, the tests are a welcome side effects and TDD really helps you in design orthogonal classes that respect the OOP principles.
+
+By looking at the list above you can see that TDD is more about *design* that about testing, the tests are a welcome side effects and TDD really helps you in design orthogonal classes that respect the OOP principles.
 
 So why DHH said that TDD is dead?
 There are cases in which TDD doesn’t fit and big frameworks like Rails is one of those situations.
 Doing TDD on a Ruby on Rails application (or ASP.NET MVC) is useless, the design of the controllers is already defined by the framework itself and TDD doesn’t add anything, so in this case you can add your tests later.
 Other cases in which TDD doesn’t work, at least for me, is when I have to learn how to use a new library or a new programming language. In these cases using TDD to experiment make the learning process more difficult and complicated so I prefer to try the new stuff without other ballasts that slow me down.
+
 
 So, I will continue to do TDD when possible since until now I get lot of value from this practice and the 6 points above are for me very valuable.
