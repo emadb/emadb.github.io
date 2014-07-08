@@ -11,18 +11,18 @@ Topology organization is the most used, I saw folders named Enums, Interfaces an
 
 Starting from one of the last project I tried a completely different approach, I'm using a functional organization creating a folder for every module of my application putting in each folder the complete structure (Controllers, Models, Views, etc). 
 
-#####ContractModule
-  - Controllers
-  - Views
-  - Models
-  - Others...
+####ContractModule
+  * Controllers
+  * Views
+  * Models
+  * Others...
 
 
-#####CallCenterModule
-  - Controllers
-  - Views
-  - Models
-  - Others...
+####CallCenterModule
+  * Controllers
+  * Views
+  * Models
+  * Others...
 
 Doing this way I obtain a modular application and each folder is actually a micro-application that contains all that it needs to run and to be maintained. It's easier to find the needed files and eventually move components out of the main project.
 Usually there is also a "Common folder" that contains the cross-module assets (extension methods, directives in case of [angularjs](http://angularjs.com), global filters and so on)
