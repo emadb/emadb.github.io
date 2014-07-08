@@ -166,4 +166,5 @@ ul li p > a{
 
 .posts > li > div > ul > li{
     margin-top: 0px !important;
+    list-style: square;
 }
