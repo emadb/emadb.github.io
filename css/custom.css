@@ -163,3 +163,7 @@ ul li p > a{
 .post p > a{
     text-decoration: underline;
 }
+
+.post ul li{
+    margin-top: 0px;
+}
