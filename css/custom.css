@@ -164,6 +164,6 @@ ul li p > a{
     text-decoration: underline;
 }
 
-.post > ul > li{
+.post > li{
     margin-top: 0px !important;
 }
