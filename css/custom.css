@@ -169,6 +169,6 @@ ul li p > a{
     list-style: square;
 }
 
-.post > ul > li{
+div.post ul li{
     list-style: square;
 }
