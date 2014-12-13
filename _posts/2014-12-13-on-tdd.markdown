@@ -1,0 +1,19 @@
+---
+layout: post
+title: "On learning TDD"
+date: 2014-05-26
+comments: true
+categories:
+---
+
+Even if Test Driven Development is an old topic and even if today almost everybody should have learned the benefits of TDD I still do a lot of mentoring on the topic and some people ask me if I have some examples of code written on TDD. 
+Well, my [Github](https://github.com/emadb) account is full code written in TDD, the [Kata repository](https://github.com/emadb/kata_and_quiz) is completely written in TDD but you can’t learn TDD looking at the final result, you learn TDD watching the process that goes to the result.
+
+It’s like learning Origami. Do you think you can learn how to do a swam just looking a final result?
+
+TDD is a process and the result come after many iterations made of refactored code, deleted code, tests that are removed and is very difficult to understand why we arrived at that point just looking at the result.
+
+For example one of my usual first test is a test on a constructor that usually I delete after adding a couple of tests since it became useless and looking at the final result you miss this iteration.
+
+So what are the best way to learn it? On vimeo and youtube there are lots of kata in different languages, looking at them is a good exercise to learn the basic of the process. Pair with other developers is another way to improve you design skills and to practice TDD.
+In any case I’m available for remote pairing too! :-)
