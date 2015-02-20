@@ -13,7 +13,7 @@ I was able to watch the project folder and to start a set of tasks on every chan
 
 The project structure is:
 
-```
+``` javascript
 /src
 |-- MyProject.sln
 |-- package.json
@@ -46,4 +46,4 @@ grunt.loadNpmTasks('grunt-contrib-uglify');
 
 The full Gruntfile.js is [available as a gist](https://gist.github.com/emadb/906a5fee800480e079f2) feel free to use it and modify on your needs.
 
-Consider that this works without Visual Studio so if you prefer you can use a lighweight editor like SublimeText (with Omnisharp)
+Consider that this works without Visual Studio so if you prefer you can use a lighweight editor like [SublimeText](http://www.sublimetext.com/3) (with [Omnisharp](http://www.omnisharp.net/))
