@@ -12,6 +12,7 @@ So I tried to combine a set of developer tasks to automate an [ASP.NET MVC/WebAp
 I was able to watch the project folder and to start a set of tasks on every change of a file so that I can rebuild the app, publish it in a folder and refresh the browser to see whats changed.
 
 The project structure is:
+
 ```
 /src
 |-- MyProject.sln
@@ -25,6 +26,7 @@ The project structure is:
        |-- /Views
        |-- MyProject.csproj
 ```
+
 Task by task I created the Gruntfile. Here is the list of task that I used:
 
 ``` javascript
