@@ -1,15 +1,15 @@
 ---
 layout: post
-title: "Build you ASP.NET MVC app with Grunt"
+title: "Build your ASP.NET MVC app with Grunt"
 date: 2015-02-21
 comments: true
 categories:
 ---
 
-[Grunt](http://gruntjs.com/) (and [Gulp](http://gulpjs.com/)) is a marvellous tool to automate you development and build pipeline but until few months ago it was directly tied to the node environment.
+[Grunt](http://gruntjs.com/) (and [Gulp](http://gulpjs.com/)) is a marvellous tool to automate your development and build pipeline but until few months ago it was directly tied to the node environment.
 But since Microsoft is becaming more open source, some developers started to develope Grunt tasks to support the .NET pipeline.
 So I tried to combine a set of developer tasks to automate an [ASP.NET MVC/WebApi](http://asp.net/mvc) project....and it works! 
-I was able to watch the project folder and to start a set of tasks on every change of a file so that I can rebuild the app, publish it in a folder and refresh the browser to see whats changed.
+I was able to watch the project folder and to start a set of tasks on every change to a file so that I can rebuild the app, publish it in a folder and refresh the browser to see what's changed.
 
 The project structure is:
 
