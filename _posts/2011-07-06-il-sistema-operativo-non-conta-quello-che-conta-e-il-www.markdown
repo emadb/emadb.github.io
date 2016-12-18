@@ -58,7 +58,7 @@ Quindi HTML5, Javascript e CSS3 ci supportano benissimo nella realizzazione di a
 
 
 
-Altri segnali di questa mia previsione è il mondo OSS che è quasi al 100% legato al web. Oggi si parla tanto di [CoffeeScript](http://jashkenas.github.com/coffee-script/), [SASS](http://sass-lang.com/), [LessCSS](http://lesscss.org/), [Node.js](http://nodejs.org/), [Backbone.js](http://documentcloud.github.com/backbone/), [Sproutcore](http://www.sproutcore.com/), [Cloud9](http://cloud9ide.com/), [Redis](http://redis.io/),...  tutte tecnologie e strumenti che il programmatore Microsoft non conosce ma che farebbe bene a guardare (e anche di questo ne riparleremo).
+Altri segnali di questa mia previsione è il mondo OSS che è quasi al 100% legato al web. Oggi si parla tanto di [CoffeeScript](http://jashkenas.github.com/coffee-script/), [SASS](http://sass-lang.com/), [LessCSS](http://lesscss.org/), [Node.js](http://nodejs.org/), [Backbone.js](http://backbonejs.org/), [Sproutcore](http://www.sproutcore.com/), [Cloud9](http://cloud9ide.com/), [Redis](http://redis.io/),...  tutte tecnologie e strumenti che il programmatore Microsoft non conosce ma che farebbe bene a guardare (e anche di questo ne riparleremo).
 
 
 
