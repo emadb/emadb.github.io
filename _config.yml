@@ -1,8 +1,8 @@
 name: ema.blog
 description: "Emanuele DelBono's blog"
 url: http://ema.codiceplastico.com
-markdown: redcarpet
-pygments: true
+markdown: kramdown
+highlighter: rouge
 auto: true
 paginate: 5
 paginate_path: "/page:num"
