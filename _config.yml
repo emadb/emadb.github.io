@@ -13,3 +13,4 @@ excerpt_separator: ""   # Workaround for http://blog.slaks.net/2013-08-09/jekyll
 # Disqus Comments
 disqus_short_name: emadb
 disqus_show_comment_count: true
+plugins: [jekyll-paginate]
