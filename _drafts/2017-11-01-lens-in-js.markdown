@@ -16,14 +16,14 @@ const obj = {
   "media_details": {
     "width": 913,
     "height": 1345,
-    "file": "2017\/07\/tatoo_bazery_copia.jpg",
+    "file": "2017\/07\/immagine1.jpg",
     "sizes": [{
       "thumbnail": {
-        "file": "tatoo_bazery_copia-150x150.jpg",
+        "file": "immagine1-150x150.jpg",
         "width": 150,
         "height": 150,
         "mime_type": "image\/jpeg",
-        "source_url": "http:\/\/blog.bazery.com\/wp-content\/uploads\/2017\/07\/tatoo_bazery_copia-150x150.jpg"
+        "source_url": "http:\/\/blog.my-site.com\/wp-content\/uploads\/2017\/07\/immagine1-150x150.jpg"
       },
     },{}]
   }
@@ -46,6 +46,7 @@ if (obj.media_details) {
 ```
 
 _NB: sto andando direttamente sull’indice 0 dell’array thumbnails per semplificare l’esempio_
+
 Non e’ sicuramente un’implementazione elegante...ma funziona.
 Possiamo fare di meglio?
 A parte fare un po’ di microrefactoring che non porta molto lontano possiamo provare ad usare un costrutto della programmazione funzionale: le Lens (o lenti in italiano).
@@ -65,7 +66,11 @@ Supponiamo di voler modificare l'attributo ricercato prima tramite la lens per o
 Con le lens l'operazione di set diventa:
 
 ```javascript
-R.set(imgLens, 'nuovo_url', obj)
+const newObj = R.set(imgLens, 'nuovo_url', obj)
 ```
+
+Le Lens sono un costrutto molto utile anche se poco conosciuto e spesso annegato in librerie tipo Ramda.js. La cosa interessante oltre alla semplificazione che portano al codice e' la peculiarita' di essere funzioni che possono essere riutilizzate in varie parti del codice e che si possono comporre con altre per ottenere funzionalita' piu' complesse, cosa che si sposa benissimo con altri costrutti della programmazione funzionale.
+
+
 
 
