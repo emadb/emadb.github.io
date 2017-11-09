@@ -7,9 +7,9 @@ title: Lens in javascript
 ---
 
 Qualche settimana fa per un progetto che stiamo sviluppando abbiamo dovuto interfacciarci con le API di wordpress per recuperare alcune informazioni dai post pubblicati su un blog.
-La struttura dati ritornata dalle API di wordpress e’ abbastanza _nested_ e ogni livello potrebbe non essere presente, questo comporta che prima di accedere ad un attributo figlio va controllato che non sia `undefined`.
+La struttura dati restituita dalle API di wordpress e’ abbastanza _nested_ e ogni livello potrebbe non essere presente, questo comporta che prima di accedere ad un attributo figlio va controllato che il padre non sia `undefined`.
 
-Per andare sul concreto questa e’ una parte del json che le API ritornano:
+Per andare sul concreto questa e’ una parte del json che le API restituiscono:
 ```
 const obj = {
   ...
