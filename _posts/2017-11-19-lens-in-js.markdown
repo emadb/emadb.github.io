@@ -1,0 +1,76 @@
+---
+comments: true
+date: 2017-11-19 00:00:00
+layout: post
+slug: lens-in-javascript
+title: Lens in javascript
+---
+
+Qualche settimana fa per un progetto che stiamo sviluppando abbiamo dovuto interfacciarci con le API di wordpress per recuperare alcune informazioni dai post pubblicati su un blog.
+La struttura dati restituita dalle API di wordpress e’ abbastanza _nested_ e ogni livello potrebbe non essere presente, questo comporta che prima di accedere ad un attributo figlio va controllato che il padre non sia `undefined`.
+
+Per andare sul concreto questa e’ una parte del json che le API restituiscono:
+```
+const obj = {
+  ...
+  "media_details": {
+    "width": 913,
+    "height": 1345,
+    "file": "2017\/07\/immagine1.jpg",
+    "sizes": [{
+      "thumbnail": {
+        "file": "immagine1-150x150.jpg",
+        "width": 150,
+        "height": 150,
+        "mime_type": "image\/jpeg",
+        "source_url": "http:\/\/blog.my-site.com\/wp-content\/uploads\/2017\/07\/immagine1-150x150.jpg"
+      },
+    },{}]
+  }
+}
+```
+
+L’attributo che andava estrapolato e’ l’url dell’immagine `thumbnail`
+
+La prima implementazione che ci e’ venuta in mente e’ questa:
+```
+if (obj.media_details) {
+  if (obj.media_details.sizes) {
+    if (obj.media_details.sizes && obj.media_details.sizes.length > 0){
+      if (obj.media_details.sizes[0].thumbnail.source_url) {
+        img = obj.media_details.sizes[0].thumbnail.source_url
+      }
+    }
+  }
+}
+```
+
+_NB: sto andando direttamente sull’indice 0 dell’array thumbnails per semplificare l’esempio_
+
+Non e’ sicuramente un’implementazione elegante...ma funziona.
+Possiamo fare di meglio?
+A parte fare un po’ di microrefactoring che non porta molto lontano possiamo provare ad usare un costrutto della programmazione funzionale: le Lens (o lenti in italiano).
+Le lens sono delle **functional reference** ad un attributo di una struttura dati che permettono di leggerne il valore o di settarne il valore. 
+Librerie come [ramda.js](http://ramdajs.com) hanno un set di funzioni pronte all’uso e il codice sopra puo’ essere riscritto in questo modo:
+
+```
+const imgLens = R.lensPath(['media_details', 'sizes', 0, 'thumbnail', 'source_url'])
+img = R.view(imgLens, obj)
+```
+
+Decisamente piu’ semplice, leggibile e mantenibile. La funzione `lensPath` construisce il percorso per raggiungere l’attributo, la funzione `view` ne estrae il valore.
+
+Le Lens sono molto utili anche per cambiare il valore di un attributo di una struttura dati tipo quella sopra tramite la funzione `R.set` di ramda.
+
+Supponiamo di voler modificare l'attributo ricercato prima tramite la lens per ottenere un nuovo `obj`. Senza il costrutto lens dovremmo scrivere una funzione simile a quella usata per il get (anche se sarebbe meglio che la modifica crei un nuovo oggetto).
+Con le lens l'operazione di set diventa:
+
+```javascript
+const newObj = R.set(imgLens, 'nuovo_url', obj)
+```
+
+Le Lens sono un costrutto molto utile anche se poco conosciuto e spesso annegato in librerie tipo Ramda.js. La cosa interessante oltre alla semplificazione che portano al codice e' la peculiarita' di essere funzioni che possono essere riutilizzate in varie parti del codice e che si possono comporre con altre per ottenere funzionalita' piu' complesse, cosa che si sposa benissimo con altri costrutti della programmazione funzionale.
+
+
+
+
