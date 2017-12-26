@@ -1,0 +1,18 @@
+---
+comments: true
+date: 2017-12-27 00:00:00
+layout: post
+slug: arcade
+title: Arcade in Codiceplastico
+---
+In [CodicePlastico](http://codiceplastico.com) abbiamo sempre cercato modi per creare un ambiente piacevole in cui passare la giornata lavorativa. Sappiamo benissimo che il nostro lavoro di programmatori ha parecchi aspetti negativi legati principalmente al poco movimento e al prolungarsi delle ore passate a concentrarsi su un problema.
+Per questo, senza imporre regole o obblighi, nel tempo ci siamo inventati strumenti e metodi per migliorare la situazione.
+Abbiamo iniziato anni fa con le freccette, "sport" al quale ci dedichiamo giornalmente con sfide all’ultimo 20 triplo!
+Da un annetto circa abbiamo introdotto anche l’acquisto aziendale di frutta (esistono fruttivendoli che vendono su internet!) e non ci facciamo mai mancare un po’ di frutta di stagione da consumare durante i meeting interni o durante le pause.
+Ma la grande novita’ di questi gioni e’ lui:
+
+![Eccolo]({{ "/images/cabinato.jpg" =100x20 }})
+
+Ci siamo regalati un cabinato brandizzato CodicePlastico per staccare la mente dal codice e ritornare ai tempi delle scuole medie con i videogiochi del passato.
+
+Insomma le giornate lavorative sono diventate piu’ divertenti e tra un test verde e uno rosso abbiamo tempo per qualche sfida!
