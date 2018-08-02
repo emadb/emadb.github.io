@@ -115,7 +115,8 @@ const person = (name: string) => (age: number): Person => ({ name, age })
 e liftarlo con `liftA2` (non conosco typescript e fp-ts quindi vado un po' di pseudo codice)
 
 ```
-const personLiftata = liftA2(person)
+const A = getApplicative(getSemigroup<string>())
+const personLiftata = liftA2(A)(person)
 ```
 
 ed in fine validationPerson invocherà la versione liftata
