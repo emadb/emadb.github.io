@@ -50,9 +50,9 @@ in scala
 def ap: [A, B](fab: F[A => B], fa: F[A]) => F[B]
 ```
 in poche parole
-1. accetta fab: una funzione da A=>B wrappata in un effetto F aka F[A => B]
-2. accetta fa: un valore A wrappato in un effetto aka F[A]
-3. restutisce un F[B]
+  1. accetta fab: una funzione da `A=>B` wrappata in un effetto `F` aka `F[A => B]`
+  2. accetta fa: un valore `A` wrappato in un effetto aka `F[A]`
+  3. restutisce un `F[B]`
 
 invocando le singole validazioni ottengo
 
