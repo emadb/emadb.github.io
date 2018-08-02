@@ -30,7 +30,7 @@ Typescript no, prima sfiga.
 > [ema] Allora perchè curried?
 
 Questo accade perchè Applicative serva a comporre una funzione con effetti (le funzioni di validazione) + una funzione senza effetti con due parametri (la funzione di creazione di person). 
-Nel mondo fp ovvero haskell una funzione con due paramentri (a, b) => c è di fatto (grazie a curry) 2 funzioni da 1 parametro a => b => c. 
+Nel mondo fp ovvero haskell una funzione con due paramentri `(a, b) => c` è di fatto (grazie a curry) 2 funzioni da 1 parametro `a => b => c`. 
 Molto probabilmente Fp-Ts ha scelto di seguire più da vicino lo stile haskell, seconda sfiga.
 In scala gli autori di librerie tendono ad evitare il currying perchè non è naturale nel linguaggio.
 
