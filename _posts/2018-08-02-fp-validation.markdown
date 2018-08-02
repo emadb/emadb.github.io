@@ -1,6 +1,6 @@
 ---
 comments: true
-date: 2018-02-08 00:00:00
+date: 2018-08-02 00:00:00
 layout: post
 slug: fp-validation
 title: Fp-ts validation spiegata bene
