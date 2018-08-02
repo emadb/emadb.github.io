@@ -48,7 +48,7 @@ readonly ap: <A, B>(fab: HKT<F, (a: A) => B>, fa: HKT<F, A>) => HKT<F, B>
 ```
 in scala
 ```
-def ap: [A, B](fab: F[A => B], fa: F[A]) => F[B]
+def ap: [A, B](fab: F[A => B], fa: F[A]): F[B]
 ```
 in poche parole
   1. accetta fab: una funzione da `A=>B` wrappata in un effetto `F` aka `F[A => B]`
@@ -231,9 +231,11 @@ la validazione della `TrainDateTime` è una composizione applicativa di `validat
 ```
 function validateTrainDateTime(input: Record<string, string>): Validation<NonEmptyArray<string>, TrainDateTime> 
     createTrainDateTimeLiftata(validateDate(input['date']), validateTime(input['time']))
+```
 
 idem per Station e SelectedSolution, comporre le altre funzioni (che erano a sua volta composte da altre funzioni)
 
+```
 function validateStation(input: string): Validation<NonEmptyArray<string>, Station>
     validateNotEmpty(input).map(createStation)
 
