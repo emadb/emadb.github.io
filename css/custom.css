@@ -24,7 +24,7 @@ header{
 }
 
 .title > p{
-    font-size: 19px;
+    font-size: 16px;
     font-family: "Flavin";
 }
 .title > a{
@@ -69,12 +69,6 @@ body
     background-image: -webkit-linear-gradient(bottom, #f04031 25%, #F26130 82%);
     background-image: -ms-linear-gradient(bottom, #f04031 25%, #F26130 82%);
 }​
-ul.posts li:first-child + li{
-    margin-top: 70px;
-}
-ul.posts li:nth-child(n+1){
-    margin-top: 70px;
-}
 
 ul.archive li:first-child + li{
     margin-top: 50px;
@@ -113,7 +107,7 @@ ul.archive li:nth-child(n+1){
     color:#F26130 !important;
 }
 p{
-    font-size: 19px;
+    font-size: 18px;
     text-align: justify;
 }
 
@@ -166,9 +160,5 @@ ul li p > a{
 
 .posts > li > div > ul > li{
     margin-top: 0px !important;
-    list-style: square;
-}
-
-div.post ul li{
     list-style: square;
 }
