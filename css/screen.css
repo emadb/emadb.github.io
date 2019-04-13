@@ -713,7 +713,6 @@ blockquote {
 }
 /* line 190, ../vendor/bootstrap/_type.scss */
 blockquote p {
-  font-size: 17.5px;
   font-weight: 300;
   line-height: 1.25;
 }
@@ -771,15 +770,12 @@ address {
 /* line 8, ../vendor/bootstrap/_code.scss */
 code,
 pre {
-  font-family: Monaco, Menlo, Consolas, "Courier- New", monospace;
+  font-family: Consolas, "Courier- New", monospace;
 }
 
 /* line 13, ../vendor/bootstrap/_code.scss */
 code {
-  padding: 2px 4px;
-  font-size: 80%;
   white-space: nowrap;
-  border-radius: 4px;
 }
 
 /* line 23, ../vendor/bootstrap/_code.scss */
@@ -3832,7 +3828,6 @@ input[type="button"].btn-block {
   text-decoration: none;
   background-color: transparent;
   background-image: none;
-  filter: progid:DXImage-transform@mixin Microsoft.gradient(enabled = false);
   cursor: not-allowed;
 }
 
@@ -7552,7 +7547,8 @@ td.visible-print {
 
 /* line 32, ../base/_theme.scss */
 body {
-  font-family: "Flavin";
+  font-family: "Open Sans";
+  font-weight: 300;
   font-size: 16px;
   background-color: black;
   padding-top: 50px;
@@ -7575,11 +7571,6 @@ a {
 /* line 55, ../base/_theme.scss */
 a:hover, a:focus {
   text-decoration: none;
-}
-
-/* line 61, ../base/_theme.scss */
-li {
-  list-style: none;
 }
 
 /* line 66, ../base/_theme.scss */

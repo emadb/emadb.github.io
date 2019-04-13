@@ -4,23 +4,23 @@ layout: default
 
 <div id="home" class="row">
 <div class="col-md-9">
-  <ul class="posts">
+  <div class="posts">
     {% for post in paginator.posts offset: 0 limit: 10%}
-      <li>
-        <div class="blog-post-date">{{ post.date | date_to_string }}</div>
+      <div class="post">
         <div class="blog-post-title">
-            <a href="{{ post.url }}">{{ post.title }}</a>
+          <a href="{{ post.url }}">{{ post.title }}</a>
         </div>
+        <div class="blog-post-date">{{ post.date | date_to_long_string }}</div>
         <div>
             {{ post.content }}
         </div>
-      </li>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
   </div>
   <div class="col-md-3">
     <div class="right-panel">
-      <h3>Recent Posts</h3>
+      <h3>Post recenti</h3>
       <ul class="recent-posts">
         {% for post in site.posts offset: 0 limit: 5  %}
         <li>
