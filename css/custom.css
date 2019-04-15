@@ -24,9 +24,9 @@ header{
 }
 
 .title > p{
-    font-size: 40px;
+    font-size: 36px;
     margin-top: -25px;
-    font-family: "Calibre";
+    font-family: "Calibre-Semibold";
 }
 .title > a{
     color: #FFFFFF !important; 
