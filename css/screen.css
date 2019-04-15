@@ -1002,10 +1002,7 @@ pre code {
 
 @media (min-width: 768px) {
   /* line 118, ../vendor/bootstrap/_grid.scss */
-  .container {
-    max-width: 750px;
-  }
-
+  
   /* line 132, ../vendor/bootstrap/_grid.scss */
   .col-sm-1,
   .col-sm-2,
@@ -1088,7 +1085,7 @@ pre code {
 
   /* line 144, ../vendor/bootstrap/_grid.scss */
   .col-sm-10, #navbar-content, #footer-content, #team-header, .team-member, #case-history-header h1, #case-history-list article, #slides-header, #slides, #blog-header, #posts {
-    width: 83.33333%;
+    width: 87%;
   }
 
   /* line 145, ../vendor/bootstrap/_grid.scss */
@@ -1268,9 +1265,7 @@ pre code {
 }
 @media (min-width: 992px) {
   /* line 196, ../vendor/bootstrap/_grid.scss */
-  .container {
-    max-width: 970px;
-  }
+ 
 
   /* line 209, ../vendor/bootstrap/_grid.scss */
   .col-md-1,
@@ -1532,9 +1527,7 @@ pre code {
 }
 @media (min-width: 1200px) {
   /* line 276, ../vendor/bootstrap/_grid.scss */
-  .container {
-    max-width: 1170px;
-  }
+  
 
   /* line 290, ../vendor/bootstrap/_grid.scss */
   .col-lg-1,
