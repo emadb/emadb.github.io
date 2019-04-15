@@ -1,0 +1,25 @@
+---
+layout: post
+slug: teamsxprogetti
+title: Teams x Progetti
+---
+
+CodicePlastico è una software house nel classico senso del termine: il suo unico scopo di business è soddisfare i bisogni dei suoi clienti mediante programmi scritti ad-hoc. Non rivendiamo, customizziamo, modifichiamo software fatto da altri ma scriviamo sempre tutto da zero.
+Oggi siamo in 15 persone, 14 sviluppatori e una persona che si occupa della parte amministrativa/gestionale/organizzativa dell'azienda.
+Queste 15 persone seguono diversi progetti.
+I progetti arrivano, iniziano, qualche volta finiscono molte volte continuano per anni e la cosa più difficile per noi è ottimizzare lo scheduling delle persone sopratutto per progetti che sono nella fase di coda lunga (principali sviluppi terminati e attività manutenzione, correzione e piccole aggiunte in corso)
+Fino ad oggi abbiamo fatto in modo che ogni progetto sia assegnato ad un microteam di 2-4 persone e che queste persone seguissero più di un progetto per contemporaneamente, tipicamente un progetto principale e uno o due progetti secondari su cui fare piccole manutenzioni.
+Questo meccanismo crea incroci difficili da sbrogliare soprattutto quando i numeri crescono. Capita che i team si "rubino" le persone a vicenda per poter terminare il progetto o effettuare un veloce intervento.
+
+Uno dei modelli ideali, raccontato anche da alcuni coach è quello in cui tutti possono lavorare su tutti i progetti cosi da poter modulare l'effort a seconda delle esigenze. Ma anche questo, con i nostri numeri, diventa molto difficile, soprattutto per progetti grossi con una lunga storia.
+Se poi aggiungiamo il fatto che abbiamo in produzione diversi stack tecnologici le cose sono ancora più complesse.
+
+Un'idea ci è venuta ripercorrendo la storia di codiceplastico e ricordando quando questo per noi non era un problema. Era il periodo in cui eravamo 5-6 persone, tutte commitate su tutti i progetti (che al tempo non erano molti come oggi) e tutti in grado di intervenire in caso di necessita'.
+
+Ci abbiamo pensato, abbiamo valutato varianti e il modello che si sta concretizzando è quello in cui tutti possono lavorare su tutto ma su una scala ridotta.
+Stiamo cioè provando a creare tante (tre?) piccole CodicePlastico che siano autonome, per buona parte isolate dalle altre e responsabili di un sottoinsieme (proprio) dei progetti di tutta l'azienda.
+In questo modo ogni unita' potrà seguire un piccolo set di progetti e su quelli avrà tutta l'autonomia necessaria, tutti i membri dell'unita' saranno in grado di metterci le mani sia come per lo sviluppo che per la manutenzione.
+
+L'idea ci piace e sembra, in linea teorica, funzionare correttamente. L'unico drawback che stiamo vedendo e' il fatto che con il tempo potrebbero crearsi dei silos isolati che non comunicano tra loro essendo di fatto piccole aziende separate. Per far fronte a questo ipotetico problema abbiamo pensato di predisporre un programma di rotazione delle persone: una volta ogni tanto (stiamo ancora cercando di capire qual e' l'intervallo di tempo giusto) una persona si sposta da una unita' ad un'altra in modo che nel giro di 12-18 mesi tutti siano in un nuovo team.
+
+Questo e' l'ennesimo esperimento che stiamo conducendo per provare a diventare ancora migliori di quanto siamo oggi.
