@@ -17,7 +17,7 @@ header{
 
 .title{
     color: #FFFFFF;
-    margin-left: 108px;
+    margin-left: 50px;
     font-size: 80px;
     font-family: "Calibre-Semibold";
     padding-top: 65px;
@@ -173,4 +173,8 @@ ul li p > a{
 .posts > li > div > ul > li{
     margin-top: 0px !important;
     list-style: square;
+}
+
+#navbar-content {
+    margin-left: 35px;
 }
