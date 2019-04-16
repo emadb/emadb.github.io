@@ -2,6 +2,7 @@
 layout: post
 slug: teamsxprogetti
 title: Teams x Progetti
+date: 2019-04-23 00:00:00
 ---
 
 CodicePlastico è una software house nel classico senso del termine: il suo unico scopo di business è soddisfare i bisogni dei suoi clienti mediante programmi scritti ad-hoc. Non rivendiamo, customizziamo, modifichiamo software fatto da altri ma scriviamo sempre tutto da zero.
