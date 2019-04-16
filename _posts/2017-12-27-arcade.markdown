@@ -11,7 +11,7 @@ Abbiamo iniziato anni fa con le freccette, "sport" al quale ci dedichiamo giorna
 Da un annetto circa abbiamo introdotto anche l’acquisto aziendale di frutta (esistono fruttivendoli che vendono su internet!) e non ci facciamo mai mancare un po’ di frutta di stagione da consumare durante i meeting interni o durante le pause.
 Ma la grande novita’ di questi gioni e’ lui:
 
-![Eccolo]({{ "/images/cabinato.jpg" =100x20 }})
+![Eccolo]("/images/cabinato.jpg")
 
 Ci siamo regalati un cabinato brandizzato CodicePlastico per staccare la mente dal codice e ritornare ai tempi delle scuole medie con i videogiochi del passato.
 
