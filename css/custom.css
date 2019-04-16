@@ -128,9 +128,17 @@ p{
 }
 
 .post{
-    padding: 40px;
     margin: 0px;
 }
+
+#home .post {
+    padding: 25px;
+}
+
+.post:first-child {
+    border-top: 0;
+}
+
 .pagination{
     width: 100%;
 }
@@ -177,4 +185,9 @@ ul li p > a{
 
 #navbar-content {
     margin-left: 35px;
+}
+
+#home {
+    margin-right: 0;
+    margin-left: 0;
 }
