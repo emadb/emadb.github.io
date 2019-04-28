@@ -1,0 +1,35 @@
+---
+layout: post
+slug: tastiere
+title: Danzare sulla tastiera
+date: 2019-04-30 00:00:00
+---
+
+Parecchi anni fa ero un fan di [Resharper](https://www.jetbrains.com/resharper), ricordo ancora alcuni degli shortcut che usavo e penso agli incredibili livelli di produttività che ti permetteva di raggiungere con Visual Studio. 
+E' stato allora che ho iniziato ad amare l'uso della tastiera e ho capito che il mouse e' uno strumento utile ma lento e scomodo.
+Da alcuni anni tutti in CodicePlastico si sono dotati di tastiere meccaniche, siamo partiti con le DAS e gli switch [CherryMx Brown](https://www.cherrymx.de/en/mx-original/mx-brown.html) leggeri e silenziosi, poi alcuni di noi sono passati alle tastiere Filco e ai [Blue switch](https://www.cherrymx.de/en/mx-original/mx-blue.html) molto più "clicky" e piacevoli.
+All'inizio non ci credevo ma l'uso di una tastiera meccanica, oltre che comoda facilita la scrittura veloce e l'uso della tastiera e gli switch meccanici hanno un feedback più preciso, una corsa della giusta lunghezza e una curva di risposta ideale per chi usa tanto la tastiera.
+
+Qualche anno fa nelle community degli sviluppatori si e' parlato parecchio di [questo articolo](http://stevelosh.com/blog/2012/10/a-modern-space-cadet/) in cui l'autore spiega come ricostruire (almeno virtualmente) la gloriosa [Space cadet keyboard](http://world.std.com/~jdostale/kbd/SpaceCadet.html)
+
+Ma questo e' stato solo l'inizio e un mondo si e' aperto. Il layout delle tastiere qwerty non e' l'ideale per scrivere, si sa ma siamo ormai abituati ad usarlo. Quello che pero' stanca di piu' e' dover continuamente spostare le dita dalle lettere per arrivare ai tasti modificatori (CTRL-SHIFT-ALT-CMD).
+Alcuni amici mi hanno fatto conoscere l'esistenza di una famiglia di tastiere che hanno un firmware open source e quindi permettono una completa customizzazione dei tasti modificando  il firmware e flashando il chip della tastiera. Il firmware in questione e' il [QMK](https://github.com/qmk)
+
+Cosi, incuriosito da questa novità (almeno per me), mi sono comprato una [Whitefox](https://input.club/whitefox/), una piccola tastiera 65%, molto elegante e completamente Open source (per i maker: su [Github](https://github.com/kiibohd/case) si trovano gli schemi elettrici della board oltre ai disegni tecnici del case e le istruzioni di montaggio). La Whitefox inutile dirlo utilizza il firmware QMK.
+
+Con questa tastiera abbinata al firmware e' possibile rimappare i tasti ma soprattutto assegnare allo stesso tasto diverse funzioni a seconda di come viene premuto. Ad esempio nel mio caso specifico il tasto S emette una S se premuto normalmente ma diventa SHIFT se tenuto premuto. Quindi la combinazione S+P stampa una P maiuscola.
+
+L'obbiettivo del remapping dei tasti e' quello di spostare i tasti più utilizzati vicino alla home row. (La home row e' la fila di tasti ASDF....)
+La prima modifica che ho fatto e' stata di spostare i tasti freccia nei pressi della home row. I tasti freccia sono tra i più utilizzati, li usiamo per spostarci tra le linee di codice, per selezionare il testo, per navigare tra le cartelle e aprire i file, quindi averli addirittura fuori dalla tastiera e' davvero scomodo e poco produttivo.
+Per cui ho modificato il firmware per avere i tasti I-J-K-L come tasti freccia uniti ad un modificatore che li attivava. Dove mettere il modificatore? Anch'esso l'ho voluto sulla home row per cui ho usato il tasto A.
+Come dicevo prima e' possibile far si che il tasto A si comporti come A se premuto da solo, e si comporti da modificatore se premuto insieme ad un altro tasto.
+Quindi A+ J e' la freccia sinistra, A + K e; la freccia in basso , ecc...
+
+Questa e' stata la prima modifica effettuata su consiglio dell'amico [Arialdo](https://github.com/arialdomartini/). Devo ammettere che e' stato illuminante, mai avrei pensato di poterli usare fin da subito.
+Ma abbiamo appena incominciato, appena ci si abitua viene a mancare un altro set di tasti modificatori: i classici SHIFT, ALT, CMD (o CTRL). Le frecce come detto prima spesso si usano insieme a SHIFT per poter selezionare del testo, ad ALT per avanzare di una parola alla volta o a CMD per andare ad inizio/fine riga e avere i tasti freccia a portata di mano ma i modificatori lontano e' vantaggioso solo a meta'.
+Quindi il remapping successivo e' stato di portare tutti i modificatori sulla home row. Per cui S = SHIFT, D = ALT, F = CMD e per simmetria J = CMD, K = ALT, L = SHIFT.
+Questo si puo' fare grazie alla modifica del firmware QMK, usando i tasti sulla home row come modificatori temporanei.
+L'ultimo piccolo hack riguarda il dimenticato tasto Caps-lock (chi lo usa??). Anche lui e' tornato doppiamente utile, premuto da solo e' ESC, se tenuto premuto diventa CTRL.
+[Questo](https://github.com/emadb/qmk_firmware) e' lo stato attuale della mia nuova piccola tastiera, sicuramente andrò avanti con altre modifiche volte a massimizzare l'efficenza riducendo gli spostamenti.
+
+Un post molto nerd, per non dimenticarci che siamo nerd.
