@@ -4733,6 +4733,14 @@ input[type="button"].btn-block {
 }
 @media (max-width: 767px) {
   /* line 217, ../vendor/bootstrap/_navbar.scss */
+  .title > a {
+    display: none;
+  }
+  .title > p {
+    margin-top: -50px !important;
+    float: right;
+    margin-right: 20px;
+  }
   .navbar-nav .open .dropdown-menu, #nav .open .dropdown-menu {
     position: static;
     float: none;
