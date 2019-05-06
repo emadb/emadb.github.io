@@ -7523,7 +7523,7 @@ td.visible-print {
 
 @font-face {
   font-family: 'Calibre-Semibold';
-  src: url("/fonts/Calibre-Semibold.woff") format("woff"), url("../fonts/Calibre-Semibold.svg#Calibre-Semibold") format("svg");
+  src: url("../fonts/Calibre-Semibold.woff") format("woff"), url("../fonts/Calibre-Semibold.svg#Calibre-Semibold") format("svg");
 }
 
 @font-face {

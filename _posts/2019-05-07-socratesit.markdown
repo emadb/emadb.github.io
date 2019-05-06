@@ -17,10 +17,10 @@ Il mio giudizio e' anche quest'anno molto positivo, due giorni lunghissimi ricch
 Abbiamo parlato di Testing (tema intramontabile) con la nuova tecnica proposta da Kent Beck (test && commit or revert), di tastiere meccaniche, di come imparare nuove cose (scrivero' un post ad-hoc su questo tema), di deployment automatici, di Emacs e Vim, di cultura aziendale e tanto altro.
 
 ### Agenda del primo giorno
-![Agenda giorno 1](/images/socrates_day1.jpg){:class="img-responsive"}
+![Agenda giorno 1](/assets/images/socrates_day1.jpg){:class="img-responsive"}
 
 ### Agenda del secondo giorno
-![Agenda giorno 2](/images/socrates_day2.jpg){:class="img-responsive"}
+![Agenda giorno 2](/assets/images/socrates_day2.jpg){:class="img-responsive"}
 
 Credo che la passione sia stata la vera forza trainante perche' in questa conferenza a differenza di molte altre non c'erano i riflettori e chi raccontava la sua esperienza lo faceva solo per il gusto di farlo e di condividere con gli altri il suo punto di vista senza altri tornaconti se non un feedback per migliorarsi.
 
