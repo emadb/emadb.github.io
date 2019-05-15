@@ -239,3 +239,9 @@ ul li p > a{
     background: #222;
     color: #fff;
 }
+
+.img-responsive-small {
+    width: 50%;
+    margin: 40px auto;
+    display: block;
+}
