@@ -1,7 +1,7 @@
 ---
 layout: post
-slug: cp10y
-title: CP10Y il nostro primo company meeting
+slug: concorso
+title: Concorso di idee per scuole superiori
 ---
 ![Concorso](/assets/images/concorso.jpeg){:class="img-responsive-small"}
 
