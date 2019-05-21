@@ -29,6 +29,8 @@ plugins:
   - jekyll-feed
   - jekyll-paginate
 paginate: 5
+feed:
+  path: atom.xml
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
