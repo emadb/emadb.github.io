@@ -42,8 +42,12 @@ header{
     font-family: "Calibre-Semibold";
     font-size: 40px;
     line-height: 40px;
+    
 }
 
+.blog-post-title a {
+    color: #333333;
+}
 .archive {
     margin-top: 20px;
 }
@@ -61,7 +65,7 @@ header{
     margin-left: 15px;
     margin-right: 15px;
     margin-top: 20px;
-    text-align: justify;
+    color: #58595B;
 }
 
 body
@@ -115,9 +119,8 @@ ul.archive li:nth-child(n+1){
     color:#F26130 !important;
 }
 p{
-    font-size: 16px;
-    line-height: 1.6em;
-    text-align: justify;
+    font-size: 24px;
+    line-height: 38px;
 }
 
 .post-item{

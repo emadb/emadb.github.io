@@ -7548,7 +7548,7 @@ td.visible-print {
 
 /* line 32, ../base/_theme.scss */
 body {
-  font-family: "Open Sans";
+  font-family: Georgia, 'Times New Roman', Times, serif;
   font-weight: 300;
   font-size: 16px;
   background-color: black;
@@ -7567,7 +7567,7 @@ h6 {
 
 /* line 50, ../base/_theme.scss */
 a {
-  color: black;
+  color: #58595B;
 }
 /* line 55, ../base/_theme.scss */
 a:hover, a:focus {
