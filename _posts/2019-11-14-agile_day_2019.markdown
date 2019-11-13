@@ -16,9 +16,13 @@ Anche il mio contributo era sul tema dell'organizzazione di un team. Ho fatto un
 E' uno di quei talk che finiscono nella track "**real life experience**", non da soluzioni ma racconta cosa abbiamo fatto in codiceplastico per rimanere un'azienda che si occupa di software con uno spiccato carattere nerd.  
 Mi e' piaciuto ricevere risposte alle mie affermazioni e incontrare persone che stanno vivendo il nostro stesso processo.  
 
-![AgileDay2019](/assets/images/agile_day_1.jpg){:class="img-responsive-small"}
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/Ck8yMhX9xBhOEI" width="340" height="290" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%; margin-left:auto; margin-right:auto; display:block" allowfullscreen> </iframe>
 
 I talk "real life" credo che siano i migliori, con gli anni ho imparato a diffidare dei Guru di professione che si limitano a dispensare soluzioni a problemi opportunamente semplificati e confezionati intorno alla loro soluzione. I talk di vita vissuta invece non danno soluzioni ma raccontano di esperimenti, successi e fallimenti sta a noi rivedere pattern vissuti nella propria azienda e valutare se e' possibile replicare i successi raccontati e evitare gli errori commessi da altri.
+
+
+![AgileDay2019](/assets/images/agile_day_1.jpg){:class="img-responsive-small"}
+
 
 
 
