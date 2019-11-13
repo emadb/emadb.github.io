@@ -1,0 +1,27 @@
+---
+layout: post
+slug: agile-day-2019
+title: Agile Day 2019
+date: 2019-11-13 00:00:00
+---
+![AgileDay2019](/assets/images/agile_day_2.jpg){:class="img-responsive-small"}
+Quest'anno sono tornato all'[Agile Day](https://www.agileday.it/front/) che si e' tenuto a Modena il 9 Novembre scorso. Una conferenza che ormai e' una certezza, sicuramente una delle piu' importanti conf italiane dedicate al mondo dello sviluppo software, frequentata da tantissimi professionisti interessati a scambiarsi opinioni, punti di vista e consigli su come migliorare il prorio lavoro.  
+Ho sempre amato questa conferenza da quando nel [2005](https://web.archive.org/web/20090221161733/http:/agileday.it/2005/) da principiante sentii parlare per la prima volta di eXtreme Programming e test driven development e in cui assistetti alla famosa keynote "The race starts at 2 O'clock". Ricordo ancora il livello amatoriale della conferenza che dava al tutto un'aria quasi clandestina con pochi partecipanti appassionati, desiderosi di condivedere e curiosi di parlare di barre rosse e verdi, di user story e discutere di software design.  
+
+
+L'agile day negli anni e' cresciuto diventando una conferenza d'importanza nazionale, seguendo le mode dello sviluppo software nel mondo Agile e perdendo parte della sua vena tecnica diventanto piu' orientata ai metodi e la gestione dei team che di fatto sono le cose piu' importanti in un tipo di lavoro come il nostro in cui l'aspetto personale e' fondamentale.  
+
+
+Anche il mio contributo era sul tema dell'organizzazione di un team. Ho fatto una sessione dal titolo ["Una crescita armoniosa"](https://www.slideshare.net/emadb/una-crescita-armoniosa) in cui ho raccontato la storia degli ultimi 2-3 anni di [codiceplastico](https://codiceplastico.com), in particolare il passaggio da 10 a quasi 20 persone.  
+E' uno di quei talk che finiscono nella track "**real life experience**", non da soluzioni ma racconta cosa abbiamo fatto in codiceplastico per rimanere un'azienda che si occupa di software con uno spiccato carattere nerd.  
+Mi e' piaciuto ricevere risposte alle mie affermazioni e incontrare persone che stanno vivendo il nostro stesso processo.  
+
+![AgileDay2019](/assets/images/agile_day_1.jpg){:class="img-responsive-small"}
+
+I talk "real life" credo che siano i migliori, con gli anni ho imparato a diffidare dei Guru di professione che si limitano a dispensare soluzioni a problemi opportunamente semplificati e confezionati intorno alla loro soluzione. I talk di vita vissuta invece non danno soluzioni ma raccontano di esperimenti, successi e fallimenti sta a noi rivedere pattern vissuti nella propria azienda e valutare se e' possibile replicare i successi raccontati e evitare gli errori commessi da altri.
+
+
+
+
+
+
