@@ -1,0 +1,320 @@
+/* Cloud Studio — base styles
+   The canvas is the darkest surface (the void where particles live);
+   chrome sits on slightly lighter blue-black panels around it.
+   One accent: warm amber, the glow of a grain. */
+
+:root {
+  --bg-canvas: #0a0d13;
+  --bg-deep: #10141c;
+  --panel: #171c26;
+  --line: #2a3242;
+  --ink: #c8d0dc;
+  --ink-dim: #6b7686;
+  --accent: #e8b45a;
+  --accent-ink: #1a1206;
+  --danger: #e0716a;
+
+  --font-ui: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --inspector-width: 280px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--bg-deep);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+.mono { font-family: var(--font-mono); }
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* three grains of different sizes: the smallest possible cloud */
+.wordmark-grains {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.wordmark-grains i {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.wordmark-grains i:nth-child(1) { width: 5px; height: 5px; left: 2px;  top: 9px; }
+.wordmark-grains i:nth-child(2) { width: 3px; height: 3px; left: 10px; top: 3px; opacity: 0.8; }
+.wordmark-grains i:nth-child(3) { width: 2px; height: 2px; left: 13px; top: 12px; opacity: 0.6; }
+
+.wordmark-text {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-size: 15px;
+}
+
+.project-settings {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.field-inline {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.field-label {
+  color: var(--ink-dim);
+  font-size: 12px;
+}
+
+.field-unit {
+  color: var(--ink-dim);
+  font-size: 12px;
+}
+
+#project-name {
+  width: 132px;
+  padding: 4px 6px;
+  background: var(--bg-canvas);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.status {
+  margin-right: 8px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.status-error { color: var(--danger); }
+
+input[type="number"] {
+  width: 56px;
+  padding: 4px 6px;
+  background: var(--bg-canvas);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: right;
+}
+
+/* ---------- workspace ---------- */
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr var(--inspector-width);
+  min-height: 0; /* allow canvas zone to shrink within grid row */
+}
+
+.canvas-zone {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg-canvas);
+}
+
+#tf-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none; /* pointer drags must not scroll or pinch the page */
+}
+
+/* ---------- inspector ---------- */
+
+.inspector {
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.inspector-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 12px;
+}
+
+.inspector-empty {
+  color: var(--ink-dim);
+  font-size: 13px;
+  white-space: pre-line;
+}
+
+/* ---------- inspector fields ---------- */
+
+.field-group {
+  margin: 18px 0 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--line);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.field-group:first-child { margin-top: 0; }
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.field-name {
+  flex: 0 0 62px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.field-control {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field-control input[type="number"] {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.field-sep {
+  color: var(--ink-dim);
+  font-size: 12px;
+}
+
+.field-control .field-unit {
+  flex: 0 0 auto;
+  width: 20px;
+}
+
+.slider-row { margin-bottom: 12px; }
+
+.slider-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.slider-value {
+  font-size: 12px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+select {
+  width: 100%;
+  padding: 4px 6px;
+  background: var(--bg-canvas);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ---------- transport ---------- */
+
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.transport-spacer { flex: 1; }
+
+.time-readout {
+  margin-left: 8px;
+  font-size: 13px;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  padding: 6px 14px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) { border-color: var(--ink-dim); }
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

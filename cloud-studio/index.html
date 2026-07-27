@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='5' cy='9' r='3' fill='%23e8b45a'/%3E%3Ccircle cx='11' cy='4' r='1.8' fill='%23e8b45a' opacity='.8'/%3E%3Ccircle cx='12' cy='12' r='1.2' fill='%23e8b45a' opacity='.6'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="wordmark" aria-label="Cloud Studio">
+      <span class="wordmark-grains" aria-hidden="true">
+        <i></i><i></i><i></i>
+      </span>
+      <span class="wordmark-text">Cloud&nbsp;Studio</span>
+    </div>
+    <div class="project-settings">
+      <label class="field-inline">
+        <span class="field-label">Project</span>
+        <input id="project-name" type="text" value="untitled" maxlength="60" spellcheck="false">
+      </label>
+      <label class="field-inline">
+        <span class="field-label">Duration</span>
+        <input id="project-duration" class="mono" type="number" value="10" min="1" max="60" step="1">
+        <span class="field-unit mono">s</span>
+      </label>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="canvas-zone" aria-label="Time–frequency canvas">
+      <canvas id="tf-canvas" aria-label="Time–frequency canvas: drag to paint a cloud"></canvas>
+    </section>
+    <aside class="inspector" aria-label="Cloud inspector">
+      <h2 class="inspector-title">Cloud</h2>
+      <p class="inspector-empty">No cloud selected.<br>Drag on the canvas to paint one.</p>
+      <div class="inspector-fields" hidden></div>
+    </aside>
+  </main>
+
+  <footer class="transport">
+    <button id="btn-play" class="btn btn-primary">Play</button>
+    <button id="btn-stop" class="btn" disabled>Stop</button>
+    <div id="time-readout" class="time-readout mono" aria-live="off">0:00.000</div>
+    <div class="transport-spacer"></div>
+    <span id="status" class="status" role="status" aria-live="polite"></span>
+    <button id="btn-open" class="btn">Open</button>
+    <button id="btn-save" class="btn">Save</button>
+    <button id="btn-export" class="btn">Export WAV</button>
+    <input id="file-open" type="file" accept="application/json,.json" hidden>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WAV Editor</title>
+<style>
+  :root {
+    --bg: #14161a;
+    --panel: #1e2127;
+    --panel-hi: #2a2e36;
+    --border: #333842;
+    --text: #cdd3dd;
+    --text-dim: #7d8590;
+    --accent: #56b6f0;
+    --danger: #e06c75;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.4 system-ui, -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 10px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  #toolbar button {
+    background: var(--panel-hi);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 10px;
+    font: inherit;
+    cursor: pointer;
+  }
+  #toolbar button:hover { border-color: var(--accent); }
+  #toolbar button.active {
+    background: var(--accent);
+    color: #0d1117;
+    border-color: var(--accent);
+  }
+  #toolbar button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  #toolbar button:disabled:hover { border-color: var(--border); }
+  #toolbar #btnView.active {
+    background: #7ee787;
+    border-color: #7ee787;
+  }
+  .sep {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 6px;
+  }
+  #fileLabel {
+    margin-left: auto;
+    color: var(--text-dim);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+  }
+
+  #editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  #ruler { height: 26px; cursor: pointer; }
+  #wave { flex: 1; min-height: 0; cursor: crosshair; }
+  #minimap { height: 56px; border-top: 1px solid var(--border); cursor: pointer; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  #status {
+    display: flex;
+    gap: 18px;
+    padding: 5px 12px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  #status b { color: var(--text); font-weight: 500; }
+
+  #toast {
+    position: fixed;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel-hi);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 16px;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+    max-width: 80vw;
+  }
+  #toast.show { opacity: 1; }
+  #toast.error { border-color: var(--danger); color: var(--danger); }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <button id="btnNew" title="New file">New</button>
+  <button id="btnLoad" title="Load WAV file">Load</button>
+  <button id="btnSave" title="Save WAV file">Save</button>
+  <span class="sep"></span>
+  <button id="btnPlay" title="Play/Stop (Space)">&#9654; Play</button>
+  <button id="btnLoop" title="Toggle loop">Loop</button>
+  <span class="sep"></span>
+  <button id="btnView" title="Toggle frequency-domain view">Freq</button>
+  <span class="sep"></span>
+  <button class="tool" data-tool="point" title="Edit single samples">Point</button>
+  <button class="tool" data-tool="pencil" title="Draw across samples">Pencil</button>
+  <button class="tool" data-tool="select" title="Select a range">Select</button>
+  <span class="sep"></span>
+  <button id="btnZoomOut" title="Zoom out">&minus;</button>
+  <button id="btnZoomIn" title="Zoom in">+</button>
+  <button id="btnZoomFit" title="Fit whole file">Fit</button>
+  <span class="sep"></span>
+  <button id="btnUndo" title="Undo (Cmd/Ctrl+Z)">Undo</button>
+  <button id="btnRedo" title="Redo (Cmd/Ctrl+Shift+Z)">Redo</button>
+  <span id="fileLabel"></span>
+  <input type="file" id="fileInput" accept=".wav,audio/wav,audio/x-wav" hidden>
+</div>
+
+<div id="editor">
+  <canvas id="ruler"></canvas>
+  <canvas id="wave"></canvas>
+  <canvas id="minimap"></canvas>
+</div>
+
+<div id="status">
+  <span><span id="lblIdx">idx</span> <b id="stIdx">&ndash;</b></span>
+  <span><span id="lblTime">t</span> <b id="stTime">&ndash;</b></span>
+  <span><span id="lblVal">val</span> <b id="stVal">&ndash;</b></span>
+  <span>zoom <b id="stZoom">&ndash;</b></span>
+  <span>sel <b id="stSel">&ndash;</b></span>
+  <span><b id="stFmt">&ndash;</b></span>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+
+const MAX_SECONDS = 2;
+const DISCRETE_PX = 3;   // px per sample at which we switch to lollipop view
+const MIN_SPP = 1 / 64;  // max zoom-in: 64 px per sample
+const UNDO_CAP = 50;
+const V_MARGIN = 8;      // px above/below full-scale in the wave view
+
+/* ================= WAV codec ================= */
+
+function parseWav(buffer) {
+  const dv = new DataView(buffer);
+  const tag = o => String.fromCharCode(dv.getUint8(o), dv.getUint8(o + 1), dv.getUint8(o + 2), dv.getUint8(o + 3));
+  if (buffer.byteLength < 12 || tag(0) !== 'RIFF' || tag(8) !== 'WAVE') {
+    throw new Error('Not a RIFF/WAVE file');
+  }
+  let o = 12, fmt = null, dataOff = -1, dataLen = 0;
+  while (o + 8 <= dv.byteLength) {
+    const id = tag(o), size = dv.getUint32(o + 4, true), body = o + 8;
+    if (id === 'fmt ' && body + 16 <= dv.byteLength) {
+      fmt = {
+        format: dv.getUint16(body, true),
+        channels: dv.getUint16(body + 2, true),
+        sampleRate: dv.getUint32(body + 4, true),
+        bits: dv.getUint16(body + 14, true),
+      };
+      // WAVE_FORMAT_EXTENSIBLE: actual format code is in the sub-format GUID
+      if (fmt.format === 0xFFFE && size >= 40) fmt.format = dv.getUint16(body + 24, true);
+    } else if (id === 'data') {
+      dataOff = body;
+      dataLen = Math.min(size, dv.byteLength - body);
+    }
+    o = body + size + (size & 1);
+  }
+  if (!fmt) throw new Error('Missing fmt chunk');
+  if (dataOff < 0) throw new Error('Missing data chunk');
+
+  const isFloat = fmt.format === 3 && fmt.bits === 32;
+  const isPcm16 = fmt.format === 1 && fmt.bits === 16;
+  if (!isFloat && !isPcm16) {
+    throw new Error(`Unsupported format (code ${fmt.format}, ${fmt.bits}-bit): only 16-bit PCM and 32-bit float are supported`);
+  }
+
+  const frameBytes = (fmt.bits / 8) * fmt.channels;
+  let frames = Math.floor(dataLen / frameBytes);
+  const warnings = [];
+  const maxFrames = fmt.sampleRate * MAX_SECONDS;
+  if (frames > maxFrames) {
+    frames = maxFrames;
+    warnings.push(`file longer than ${MAX_SECONDS}s, truncated`);
+  }
+  if (fmt.channels > 1) warnings.push('stereo → left channel only');
+
+  const samples = new Float32Array(frames);
+  for (let i = 0; i < frames; i++) {
+    const off = dataOff + i * frameBytes;
+    samples[i] = isFloat ? dv.getFloat32(off, true) : dv.getInt16(off, true) / 32768;
+  }
+  return { samples, sampleRate: fmt.sampleRate, bitDepth: fmt.bits, warnings };
+}
+
+function writeWav(samples, sampleRate, bitDepth) {
+  const isFloat = bitDepth === 32;
+  const bytesPer = isFloat ? 4 : 2;
+  const n = samples.length;
+  const dataSize = n * bytesPer;
+  const fmtSize = isFloat ? 18 : 16;   // float fmt carries cbSize=0
+  const factSize = isFloat ? 12 : 0;   // non-PCM requires a fact chunk
+  const total = 12 + 8 + fmtSize + factSize + 8 + dataSize;
+  const buf = new ArrayBuffer(total);
+  const dv = new DataView(buf);
+  let o = 0;
+  const str = s => { for (const ch of s) dv.setUint8(o++, ch.charCodeAt(0)); };
+
+  str('RIFF'); dv.setUint32(o, total - 8, true); o += 4; str('WAVE');
+  str('fmt '); dv.setUint32(o, fmtSize, true); o += 4;
+  dv.setUint16(o, isFloat ? 3 : 1, true); o += 2;
+  dv.setUint16(o, 1, true); o += 2;
+  dv.setUint32(o, sampleRate, true); o += 4;
+  dv.setUint32(o, sampleRate * bytesPer, true); o += 4;
+  dv.setUint16(o, bytesPer, true); o += 2;
+  dv.setUint16(o, bitDepth, true); o += 2;
+  if (isFloat) {
+    dv.setUint16(o, 0, true); o += 2;
+    str('fact'); dv.setUint32(o, 4, true); o += 4;
+    dv.setUint32(o, n, true); o += 4;
+  }
+  str('data'); dv.setUint32(o, dataSize, true); o += 4;
+  if (isFloat) {
+    for (let i = 0; i < n; i++) { dv.setFloat32(o, samples[i], true); o += 4; }
+  } else {
+    for (let i = 0; i < n; i++) {
+      // symmetric *32768 scale (clamped) so parse→write round-trips bit-exactly
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      dv.setInt16(o, Math.max(-32768, Math.min(32767, Math.round(s * 32768))), true);
+      o += 2;
+    }
+  }
+  return buf;
+}
+
+/* ================= FFT (radix-2 + Bluestein, exact length) =================
+   Exact-length DFT so the spectrum is the true orthogonal basis of the buffer:
+   edit → resynthesize → re-transform reproduces the edited spectrum. */
+
+function fftRadix2(re, im, invert) {
+  const n = re.length; // power of 2
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      let t = re[i]; re[i] = re[j]; re[j] = t;
+      t = im[i]; im[i] = im[j]; im[j] = t;
+    }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = (invert ? 2 : -2) * Math.PI / len;
+    const wr = Math.cos(ang), wi = Math.sin(ang);
+    const half = len >> 1;
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < half; k++) {
+        const ur = re[i + k], ui = im[i + k];
+        const vr = re[i + k + half] * cr - im[i + k + half] * ci;
+        const vi = re[i + k + half] * ci + im[i + k + half] * cr;
+        re[i + k] = ur + vr; im[i + k] = ui + vi;
+        re[i + k + half] = ur - vr; im[i + k + half] = ui - vi;
+        const nr = cr * wr - ci * wi;
+        ci = cr * wi + ci * wr;
+        cr = nr;
+      }
+    }
+  }
+  if (invert) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
+
+let fftPlan = null; // chirp tables + FFT(chirp filter), cached per signal length
+
+function getFftPlan(n) {
+  if (fftPlan && fftPlan.n === n) return fftPlan;
+  let m = 1;
+  while (m < 2 * n - 1) m <<= 1;
+  const wr = new Float64Array(n), wi = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const ang = Math.PI * ((i * i) % (2 * n)) / n; // i² reduced mod 2n keeps the angle accurate
+    wr[i] = Math.cos(ang);
+    wi[i] = -Math.sin(ang);
+  }
+  const fbr = new Float64Array(m), fbi = new Float64Array(m);
+  fbr[0] = wr[0]; fbi[0] = -wi[0];
+  for (let i = 1; i < n; i++) {
+    fbr[i] = fbr[m - i] = wr[i];
+    fbi[i] = fbi[m - i] = -wi[i];
+  }
+  fftRadix2(fbr, fbi, false);
+  fftPlan = { n, m, wr, wi, fbr, fbi };
+  return fftPlan;
+}
+
+// full complex DFT of arbitrary length (Bluestein; plain radix-2 when n is a power of 2)
+function dftComplex(xr, xi) {
+  const n = xr.length;
+  if ((n & (n - 1)) === 0) {
+    const re = Float64Array.from(xr), im = Float64Array.from(xi);
+    fftRadix2(re, im, false);
+    return { re, im };
+  }
+  const p = getFftPlan(n);
+  const ar = new Float64Array(p.m), ai = new Float64Array(p.m);
+  for (let k = 0; k < n; k++) {
+    ar[k] = xr[k] * p.wr[k] - xi[k] * p.wi[k];
+    ai[k] = xr[k] * p.wi[k] + xi[k] * p.wr[k];
+  }
+  fftRadix2(ar, ai, false);
+  for (let j = 0; j < p.m; j++) {
+    const r = ar[j] * p.fbr[j] - ai[j] * p.fbi[j];
+    ai[j] = ar[j] * p.fbi[j] + ai[j] * p.fbr[j];
+    ar[j] = r;
+  }
+  fftRadix2(ar, ai, true);
+  const re = new Float64Array(n), im = new Float64Array(n);
+  for (let k = 0; k < n; k++) {
+    re[k] = ar[k] * p.wr[k] - ai[k] * p.wi[k];
+    im[k] = ar[k] * p.wi[k] + ai[k] * p.wr[k];
+  }
+  return { re, im };
+}
+
+/* Real-signal wrappers. mag[] is normalized so 1.0 = a full-scale sine
+   (0 dB); phase[] is kept separately so magnitude edits never lose it. */
+
+function computeSpectrum(samples) {
+  const n = samples.length;
+  const xr = Float64Array.from(samples), xi = new Float64Array(n);
+  const { re, im } = dftComplex(xr, xi);
+  const half = Math.floor(n / 2);
+  const mag = new Float64Array(half + 1), phase = new Float64Array(half + 1);
+  for (let k = 0; k <= half; k++) {
+    const scale = (k === 0 || (n % 2 === 0 && k === half)) ? 1 / n : 2 / n;
+    mag[k] = Math.hypot(re[k], im[k]) * scale;
+    // exact-zero bins get phase 0 by convention (atan2(±0,±0) would give ±π)
+    phase[k] = mag[k] === 0 ? 0 : Math.atan2(im[k], re[k]);
+  }
+  return { n, mag, phase };
+}
+
+function resynthesize(spec) {
+  const { n, mag, phase } = spec;
+  const half = Math.floor(n / 2);
+  const Xr = new Float64Array(n), Xi = new Float64Array(n);
+  for (let k = 0; k <= half; k++) {
+    const scale = (k === 0 || (n % 2 === 0 && k === half)) ? n : n / 2;
+    const m = mag[k] * scale;
+    Xr[k] = m * Math.cos(phase[k]);
+    Xi[k] = m * Math.sin(phase[k]);
+  }
+  for (let k = half + 1; k < n; k++) { Xr[k] = Xr[n - k]; Xi[k] = -Xi[n - k]; }
+  // IDFT via the conjugation trick: idft(X) = conj(dft(conj(X))) / n
+  for (let k = 0; k < n; k++) Xi[k] = -Xi[k];
+  const { re } = dftComplex(Xr, Xi);
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i++) out[i] = re[i] / n;
+  return out;
+}
+
+/* ================= State ================= */
+
+const state = {
+  samples: new Float32Array(44100 * MAX_SECONDS),
+  sampleRate: 44100,
+  bitDepth: 16,
+  filename: 'untitled.wav',
+  viewStart: 0,          // first visible sample (float)
+  spp: 1,                // samples per pixel
+  selection: null,       // {start, end} in samples, start < end
+  playhead: 0,           // seek position in samples
+  tool: 'point',
+  loop: false,
+  view: 'time',          // 'time' | 'freq'
+  fViewStart: 0,         // freq view: first visible bin (float)
+  fSpp: null,            // freq view: bins per pixel (null = fit on first entry)
+  undoStack: [],
+  redoStack: [],
+};
+
+let audioCtx = null;
+let workletReady = null;
+let playback = null;     // {node, startSample, lastPos}
+let audioDirty = false;  // samples changed since last push to the audio thread
+let samplesPosts = 0;
+let spec = null;         // spectrum working copy {n, mag, phase} (freq view)
+let specValid = false;   // false ⇒ spec must be recomputed from samples
+let resynthDirty = false;// spectrum edited ⇒ samples must be resynthesized
+let hover = null;        // {idx} for the status bar
+let drag = null;         // active gesture on the wave canvas
+let rulerDrag = null;
+let miniDrag = null;
+
+/* ================= Canvas setup ================= */
+
+const waveCv = document.getElementById('wave');
+const rulerCv = document.getElementById('ruler');
+const miniCv = document.getElementById('minimap');
+const waveCx = waveCv.getContext('2d');
+const rulerCx = rulerCv.getContext('2d');
+const miniCx = miniCv.getContext('2d');
+
+function resizeCanvas(cv, cx) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+  }
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function resizeAll() {
+  resizeCanvas(waveCv, waveCx);
+  resizeCanvas(rulerCv, rulerCx);
+  resizeCanvas(miniCv, miniCx);
+}
+window.addEventListener('resize', resizeAll);
+
+/* ================= Coordinate helpers ================= */
+
+const W = () => waveCv.clientWidth;
+const H = () => waveCv.clientHeight;
+const totalSamples = () => state.samples.length;
+const xOf = i => (i - state.viewStart) / state.spp;
+const sampleAt = x => state.viewStart + x * state.spp;
+const clampIdx = i => Math.max(0, Math.min(totalSamples() - 1, i));
+const yOf = v => H() / 2 - v * (H() / 2 - V_MARGIN);
+const yToVal = y => Math.max(-1, Math.min(1, (H() / 2 - y) / (H() / 2 - V_MARGIN)));
+
+function clampView(vs) {
+  const maxStart = Math.max(0, totalSamples() - W() * state.spp);
+  return Math.max(0, Math.min(maxStart, vs));
+}
+
+function fitSpp() {
+  return Math.max(MIN_SPP, totalSamples() / Math.max(1, W()));
+}
+
+function setZoom(newSpp, anchorSample, anchorX) {
+  state.spp = Math.max(MIN_SPP, Math.min(fitSpp(), newSpp));
+  state.viewStart = clampView(anchorSample - anchorX * state.spp);
+}
+
+/* Freq-view coordinates: bins on X, dB on Y (0 dB top, DB_FLOOR bottom) */
+
+const DB_FLOOR = -96;
+const MAG_FLOOR = Math.pow(10, DB_FLOOR / 20);
+const binCount = () => spec ? spec.mag.length : 0;
+const fXOf = b => (b - state.fViewStart) / state.fSpp;
+const fBinAt = x => state.fViewStart + x * state.fSpp;
+const clampBin = b => Math.max(0, Math.min(binCount() - 1, b));
+const dbOfMag = m => m <= MAG_FLOOR ? DB_FLOOR : Math.min(0, 20 * Math.log10(m));
+const magOfDb = db => db <= DB_FLOOR ? 0 : Math.pow(10, db / 20);
+const yOfDb = db => V_MARGIN + (-db / -DB_FLOOR) * (H() - 2 * V_MARGIN);
+const yToDb = y =>
+  Math.max(DB_FLOOR, Math.min(0, (y - V_MARGIN) / (H() - 2 * V_MARGIN) * DB_FLOOR));
+
+function clampViewF(vs) {
+  const maxStart = Math.max(0, binCount() - W() * state.fSpp);
+  return Math.max(0, Math.min(maxStart, vs));
+}
+
+function fitFSpp() {
+  return Math.max(MIN_SPP, binCount() / Math.max(1, W()));
+}
+
+function setZoomF(newSpp, anchorBin, anchorX) {
+  state.fSpp = Math.max(MIN_SPP, Math.min(fitFSpp(), newSpp));
+  state.fViewStart = clampViewF(anchorBin - anchorX * state.fSpp);
+}
+
+/* ================= Domain sync ================= */
+
+// time-domain samples changed by non-spectral means → spectrum is stale
+function markTimeEdited() {
+  audioDirty = true;
+  specValid = false;
+}
+
+// spectrum edited → make the time buffer catch up right now (called before
+// anything that reads samples: undo snapshots, save, playback start, frame)
+function flushResynth() {
+  if (resynthDirty && spec) {
+    state.samples = resynthesize(spec);
+    resynthDirty = false;
+    audioDirty = true;
+  }
+}
+
+/* ================= Undo / redo ================= */
+
+function pushUndo() {
+  flushResynth();
+  state.undoStack.push(state.samples.slice());
+  if (state.undoStack.length > UNDO_CAP) state.undoStack.shift();
+  state.redoStack.length = 0;
+}
+
+function undo() {
+  if (!state.undoStack.length) return;
+  flushResynth();
+  state.redoStack.push(state.samples.slice());
+  state.samples = state.undoStack.pop();
+  markTimeEdited();
+}
+
+function redo() {
+  if (!state.redoStack.length) return;
+  flushResynth();
+  state.undoStack.push(state.samples.slice());
+  state.samples = state.redoStack.pop();
+  markTimeEdited();
+}
+
+/* ================= Editing ================= */
+
+function drawLineSamples(i0, v0, i1, v1) {
+  const s = state.samples;
+  markTimeEdited();
+  if (i0 === i1) { s[i1] = v1; return; }
+  const step = i0 < i1 ? 1 : -1;
+  for (let i = i0; i !== i1 + step; i += step) {
+    const t = (i - i0) / (i1 - i0);
+    s[i] = v0 + (v1 - v0) * t;
+  }
+}
+
+// pencil in the freq view: interpolate in dB space (linear on screen)
+function drawLineBins(i0, db0, i1, db1) {
+  const mg = spec.mag;
+  resynthDirty = true;
+  if (i0 === i1) { mg[i1] = magOfDb(db1); return; }
+  const step = i0 < i1 ? 1 : -1;
+  for (let i = i0; i !== i1 + step; i += step) {
+    const t = (i - i0) / (i1 - i0);
+    mg[i] = magOfDb(db0 + (db1 - db0) * t);
+  }
+}
+
+function setSelection(a, b) {
+  let start = Math.round(Math.min(a, b));
+  let end = Math.round(Math.max(a, b));
+  start = Math.max(0, Math.min(totalSamples(), start));
+  end = Math.max(0, Math.min(totalSamples(), end));
+  state.selection = end > start ? { start, end } : null;
+}
+
+/* ================= Playback =================
+   AudioWorklet-based player: the audio thread keeps its own copy of the
+   samples, so edits can be pushed mid-playback and are heard immediately
+   (an AudioBufferSourceNode acquires its buffer at start(): later writes
+   are not guaranteed audible per spec). */
+
+const WORKLET_SRC = `
+class EditorPlayer extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this.samples = new Float32Array(0);
+    this.playing = false;
+    this.dead = false;
+    this.pos = 0;
+    this.loopStart = 0;
+    this.loopEnd = 0;
+    this.loop = false;
+    this.tick = 0;
+    this.port.onmessage = (e) => {
+      const m = e.data;
+      if (m.type === 'samples') this.samples = m.samples;
+      else if (m.type === 'start') {
+        this.pos = m.pos;
+        this.loopStart = m.loopStart;
+        this.loopEnd = m.loopEnd;
+        this.loop = m.loop;
+        this.playing = true;
+      } else if (m.type === 'loop') this.loop = m.loop;
+      else if (m.type === 'stop') { this.playing = false; this.dead = true; }
+    };
+  }
+  process(inputs, outputs) {
+    if (this.dead) return false;
+    if (!this.playing) return true;
+    const out = outputs[0][0];
+    const s = this.samples;
+    const end = Math.min(this.loopEnd, s.length);
+    for (let i = 0; i < out.length; i++) {
+      if (this.pos >= end) {
+        if (this.loop && end > this.loopStart) {
+          this.pos = this.loopStart;
+        } else {
+          this.playing = false;
+          this.dead = true;
+          this.port.postMessage({ type: 'ended' });
+          break;
+        }
+      }
+      out[i] = s[this.pos++];
+    }
+    if ((this.tick++ & 3) === 0) this.port.postMessage({ type: 'pos', pos: this.pos });
+    return true;
+  }
+}
+registerProcessor('editor-player', EditorPlayer);
+`;
+
+async function ensureAudio() {
+  // context sample rate must match the model's, or pitch/duration would shift
+  if (audioCtx && audioCtx.sampleRate !== state.sampleRate) {
+    stopPlayback();
+    audioCtx.close();
+    audioCtx = null;
+  }
+  if (!audioCtx) {
+    audioCtx = new AudioContext({ sampleRate: state.sampleRate });
+    // data: URL instead of a blob URL — blob module loading fails on file:// origins
+    const url = 'data:application/javascript,' + encodeURIComponent(WORKLET_SRC);
+    workletReady = audioCtx.audioWorklet.addModule(url);
+  }
+  await workletReady;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function stopPlayback() {
+  if (playback) {
+    playback.node.port.postMessage({ type: 'stop' });
+    playback.node.disconnect();
+    playback = null;
+  }
+  updatePlayButton();
+}
+
+async function startPlayback() {
+  try {
+    await ensureAudio();
+  } catch (err) {
+    toast('Audio init failed: ' + err.message, true);
+    return;
+  }
+  stopPlayback();
+  flushResynth();
+
+  const n = state.samples.length;
+  if (!n) return;
+
+  let startSample, loopStart, loopEnd;
+  if (state.selection) {
+    startSample = state.selection.start;
+    loopStart = state.selection.start;
+    loopEnd = state.selection.end;
+  } else {
+    startSample = clampIdx(Math.round(state.playhead));
+    loopStart = 0;
+    loopEnd = n;
+  }
+
+  const node = new AudioWorkletNode(audioCtx, 'editor-player', {
+    numberOfInputs: 0,
+    outputChannelCount: [1],
+  });
+  node.connect(audioCtx.destination);
+  node.port.postMessage({ type: 'samples', samples: state.samples.slice() });
+  node.port.postMessage({ type: 'start', pos: startSample, loopStart, loopEnd, loop: state.loop });
+
+  playback = { node, startSample, lastPos: startSample };
+  audioDirty = false;
+  node.port.onmessage = e => {
+    if (!playback || playback.node !== node) return;
+    const m = e.data;
+    if (m.type === 'pos') playback.lastPos = m.pos;
+    else if (m.type === 'ended') {
+      node.disconnect();
+      playback = null;
+      updatePlayButton();
+    }
+  };
+  updatePlayButton();
+}
+
+function togglePlay() {
+  if (playback) stopPlayback();
+  else startPlayback();
+}
+
+function playPositionSample() {
+  return playback ? playback.lastPos : null;
+}
+
+function updatePlayButton() {
+  btnPlay.innerHTML = playback ? '&#9632; Stop' : '&#9654; Play';
+}
+
+/* ================= Rendering ================= */
+
+function renderWave() {
+  const w = W(), h = H();
+  const cx = waveCx;
+  cx.fillStyle = '#14161a';
+  cx.fillRect(0, 0, w, h);
+
+  if (state.selection) {
+    const x0 = xOf(state.selection.start), x1 = xOf(state.selection.end);
+    cx.fillStyle = 'rgba(86,182,240,0.13)';
+    cx.fillRect(x0, 0, x1 - x0, h);
+    cx.strokeStyle = 'rgba(86,182,240,0.45)';
+    cx.beginPath();
+    cx.moveTo(x0 + 0.5, 0); cx.lineTo(x0 + 0.5, h);
+    cx.moveTo(x1 + 0.5, 0); cx.lineTo(x1 + 0.5, h);
+    cx.stroke();
+  }
+
+  // full-scale guides + center line
+  cx.strokeStyle = '#242830';
+  cx.beginPath();
+  cx.moveTo(0, Math.round(yOf(1)) + 0.5); cx.lineTo(w, Math.round(yOf(1)) + 0.5);
+  cx.moveTo(0, Math.round(yOf(-1)) + 0.5); cx.lineTo(w, Math.round(yOf(-1)) + 0.5);
+  cx.stroke();
+  cx.strokeStyle = '#383e49';
+  cx.beginPath();
+  cx.moveTo(0, Math.round(h / 2) + 0.5); cx.lineTo(w, Math.round(h / 2) + 0.5);
+  cx.stroke();
+
+  const s = state.samples, n = s.length;
+  const pxPerSample = 1 / state.spp;
+
+  if (pxPerSample >= DISCRETE_PX) {
+    // discrete lollipop view
+    const i0 = Math.max(0, Math.floor(state.viewStart));
+    const i1 = Math.min(n - 1, Math.ceil(sampleAt(w)));
+    cx.strokeStyle = 'rgba(86,182,240,0.30)';
+    cx.beginPath();
+    for (let i = i0; i <= i1; i++) {
+      const x = xOf(i);
+      cx.moveTo(x, h / 2);
+      cx.lineTo(x, yOf(s[i]));
+    }
+    cx.stroke();
+    cx.strokeStyle = 'rgba(86,182,240,0.55)';
+    cx.beginPath();
+    for (let i = i0; i <= i1; i++) {
+      const x = xOf(i), y = yOf(s[i]);
+      if (i === i0) cx.moveTo(x, y); else cx.lineTo(x, y);
+    }
+    cx.stroke();
+    cx.fillStyle = '#56b6f0';
+    const r = Math.min(4, Math.max(2.5, pxPerSample * 0.12));
+    for (let i = i0; i <= i1; i++) {
+      cx.beginPath();
+      cx.arc(xOf(i), yOf(s[i]), r, 0, Math.PI * 2);
+      cx.fill();
+    }
+  } else if (state.spp <= 1) {
+    // per-sample polyline (zoomed in, but not enough for dots)
+    const i0 = Math.max(0, Math.floor(state.viewStart));
+    const i1 = Math.min(n - 1, Math.ceil(sampleAt(w)));
+    cx.strokeStyle = '#56b6f0';
+    cx.beginPath();
+    for (let i = i0; i <= i1; i++) {
+      const x = xOf(i), y = yOf(s[i]);
+      if (i === i0) cx.moveTo(x, y); else cx.lineTo(x, y);
+    }
+    cx.stroke();
+  } else {
+    // min/max envelope per pixel column
+    cx.strokeStyle = '#56b6f0';
+    cx.beginPath();
+    for (let x = 0; x < w; x++) {
+      const a = Math.floor(sampleAt(x)), b = Math.floor(sampleAt(x + 1));
+      const i0 = Math.max(0, a), i1 = Math.min(n - 1, Math.max(a, b - 1));
+      if (i0 > i1) continue;
+      let mn = s[i0], mx = s[i0];
+      for (let i = i0 + 1; i <= i1; i++) {
+        const v = s[i];
+        if (v < mn) mn = v;
+        if (v > mx) mx = v;
+      }
+      cx.moveTo(x + 0.5, yOf(mx) - 0.5);
+      cx.lineTo(x + 0.5, yOf(mn) + 0.5);
+    }
+    cx.stroke();
+  }
+
+  // static playhead
+  const phX = xOf(state.playhead);
+  if (phX >= 0 && phX <= w) {
+    cx.strokeStyle = 'rgba(232,234,237,0.6)';
+    cx.beginPath();
+    cx.moveTo(Math.round(phX) + 0.5, 0); cx.lineTo(Math.round(phX) + 0.5, h);
+    cx.stroke();
+  }
+
+  // live playhead
+  const pp = playPositionSample();
+  if (pp !== null) {
+    const x = xOf(pp);
+    if (x >= 0 && x <= w) {
+      cx.strokeStyle = '#ff8c42';
+      cx.lineWidth = 1.5;
+      cx.beginPath();
+      cx.moveTo(x, 0); cx.lineTo(x, h);
+      cx.stroke();
+      cx.lineWidth = 1;
+    }
+  }
+}
+
+function renderSpectrum() {
+  const w = W(), h = H();
+  const cx = waveCx;
+  cx.fillStyle = '#14161a';
+  cx.fillRect(0, 0, w, h);
+  if (!spec || !state.fSpp) return;
+
+  // dB grid
+  cx.strokeStyle = '#242830';
+  cx.fillStyle = '#5a6270';
+  cx.font = '10px ui-monospace, Menlo, monospace';
+  cx.textBaseline = 'bottom';
+  cx.beginPath();
+  for (let db = 0; db >= DB_FLOOR; db -= 24) {
+    const y = Math.round(yOfDb(db)) + 0.5;
+    cx.moveTo(0, y);
+    cx.lineTo(w, y);
+    cx.fillText(db + ' dB', 4, y - 2);
+  }
+  cx.stroke();
+
+  const mg = spec.mag, nb = mg.length;
+  const pxPerBin = 1 / state.fSpp;
+  const floorY = h - V_MARGIN;
+
+  if (pxPerBin >= DISCRETE_PX) {
+    // discrete lollipop view: stems rise from the dB floor
+    const i0 = Math.max(0, Math.floor(state.fViewStart));
+    const i1 = Math.min(nb - 1, Math.ceil(fBinAt(w)));
+    cx.strokeStyle = 'rgba(126,231,135,0.35)';
+    cx.beginPath();
+    for (let i = i0; i <= i1; i++) {
+      const x = fXOf(i);
+      cx.moveTo(x, floorY);
+      cx.lineTo(x, yOfDb(dbOfMag(mg[i])));
+    }
+    cx.stroke();
+    cx.fillStyle = '#7ee787';
+    const r = Math.min(4, Math.max(2.5, pxPerBin * 0.12));
+    for (let i = i0; i <= i1; i++) {
+      cx.beginPath();
+      cx.arc(fXOf(i), yOfDb(dbOfMag(mg[i])), r, 0, Math.PI * 2);
+      cx.fill();
+    }
+  } else if (state.fSpp <= 1) {
+    // per-bin polyline
+    const i0 = Math.max(0, Math.floor(state.fViewStart));
+    const i1 = Math.min(nb - 1, Math.ceil(fBinAt(w)));
+    cx.strokeStyle = '#7ee787';
+    cx.beginPath();
+    for (let i = i0; i <= i1; i++) {
+      const x = fXOf(i), y = yOfDb(dbOfMag(mg[i]));
+      if (i === i0) cx.moveTo(x, y); else cx.lineTo(x, y);
+    }
+    cx.stroke();
+  } else {
+    // max-dB bar per pixel column, down to the floor
+    cx.strokeStyle = '#7ee787';
+    cx.beginPath();
+    for (let x = 0; x < w; x++) {
+      const a = Math.floor(fBinAt(x)), b = Math.floor(fBinAt(x + 1));
+      const i0 = Math.max(0, a), i1 = Math.min(nb - 1, Math.max(a, b - 1));
+      if (i0 > i1) continue;
+      let mx = 0;
+      for (let i = i0; i <= i1; i++) if (mg[i] > mx) mx = mg[i];
+      const db = dbOfMag(mx);
+      if (db <= DB_FLOOR) continue;
+      cx.moveTo(x + 0.5, yOfDb(db));
+      cx.lineTo(x + 0.5, floorY);
+    }
+    cx.stroke();
+  }
+}
+
+function renderRuler() {
+  if (state.view === 'freq') renderRulerFreq();
+  else renderRulerTime();
+}
+
+function renderRulerFreq() {
+  const w = rulerCv.clientWidth, h = rulerCv.clientHeight;
+  const cx = rulerCx;
+  cx.fillStyle = '#1e2127';
+  cx.fillRect(0, 0, w, h);
+
+  if (spec && state.fSpp) {
+    const hzPerBin = state.sampleRate / spec.n;
+    const hzPerPx = state.fSpp * hzPerBin;
+    const steps = [0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+    let step = steps[steps.length - 1];
+    for (const st of steps) { if (st / hzPerPx >= 70) { step = st; break; } }
+
+    const startHz = state.fViewStart * hzPerBin;
+    const endHz = fBinAt(w) * hzPerBin;
+    cx.strokeStyle = '#4a5160';
+    cx.fillStyle = '#7d8590';
+    cx.font = '10px ui-monospace, Menlo, monospace';
+    cx.textBaseline = 'top';
+    cx.beginPath();
+    for (let t = Math.ceil(startHz / step); t * step <= endHz; t++) {
+      const hz = t * step;
+      const x = fXOf(hz / hzPerBin);
+      cx.moveTo(Math.round(x) + 0.5, h - 8);
+      cx.lineTo(Math.round(x) + 0.5, h);
+      const label = hz >= 1000 ? (hz / 1000) + 'k' : (step < 1 ? hz.toFixed(1) : String(hz));
+      cx.fillText(label, x + 3, 3);
+      for (let k = 1; k < 5; k++) {
+        const mx = fXOf((hz + step * k / 5) / hzPerBin);
+        if (mx > w) break;
+        cx.moveTo(Math.round(mx) + 0.5, h - 4);
+        cx.lineTo(Math.round(mx) + 0.5, h);
+      }
+    }
+    cx.stroke();
+  }
+
+  cx.strokeStyle = '#333842';
+  cx.beginPath();
+  cx.moveTo(0, h - 0.5); cx.lineTo(w, h - 0.5);
+  cx.stroke();
+}
+
+function renderRulerTime() {
+  const w = rulerCv.clientWidth, h = rulerCv.clientHeight;
+  const cx = rulerCx;
+  cx.fillStyle = '#1e2127';
+  cx.fillRect(0, 0, w, h);
+
+  if (state.selection) {
+    const x0 = xOf(state.selection.start), x1 = xOf(state.selection.end);
+    cx.fillStyle = 'rgba(86,182,240,0.25)';
+    cx.fillRect(x0, 0, x1 - x0, h);
+  }
+
+  // tick spacing: pick a "nice" ms step giving >= 70 px between labels
+  const msPerPx = state.spp / state.sampleRate * 1000;
+  const steps = [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000];
+  let step = steps[steps.length - 1];
+  for (const st of steps) { if (st / msPerPx >= 70) { step = st; break; } }
+
+  const startMs = state.viewStart / state.sampleRate * 1000;
+  const endMs = sampleAt(w) / state.sampleRate * 1000;
+  cx.strokeStyle = '#4a5160';
+  cx.fillStyle = '#7d8590';
+  cx.font = '10px ui-monospace, Menlo, monospace';
+  cx.textBaseline = 'top';
+  cx.beginPath();
+  for (let ms = Math.ceil(startMs / step) * step; ms <= endMs; ms += step) {
+    const x = xOf(ms / 1000 * state.sampleRate);
+    cx.moveTo(Math.round(x) + 0.5, h - 8);
+    cx.lineTo(Math.round(x) + 0.5, h);
+    const label = step >= 1000 ? (ms / 1000).toFixed(1) + 's'
+      : (step < 1 ? ms.toFixed(2) : ms.toFixed(0)) + 'ms';
+    cx.fillText(label, x + 3, 3);
+    for (let k = 1; k < 5; k++) {
+      const mx = xOf((ms + step * k / 5) / 1000 * state.sampleRate);
+      if (mx > w) break;
+      cx.moveTo(Math.round(mx) + 0.5, h - 4);
+      cx.lineTo(Math.round(mx) + 0.5, h);
+    }
+  }
+  cx.stroke();
+
+  // playhead marker
+  const phX = xOf(state.playhead);
+  if (phX >= -4 && phX <= w + 4) {
+    cx.fillStyle = '#e8eaed';
+    cx.beginPath();
+    cx.moveTo(phX - 4, h - 8);
+    cx.lineTo(phX + 4, h - 8);
+    cx.lineTo(phX, h);
+    cx.closePath();
+    cx.fill();
+  }
+
+  cx.strokeStyle = '#333842';
+  cx.beginPath();
+  cx.moveTo(0, h - 0.5); cx.lineTo(w, h - 0.5);
+  cx.stroke();
+}
+
+function renderMinimap() {
+  if (state.view === 'freq') renderMinimapFreq();
+  else renderMinimapTime();
+}
+
+function renderMinimapFreq() {
+  const w = miniCv.clientWidth, h = miniCv.clientHeight;
+  const cx = miniCx;
+  cx.fillStyle = '#181b20';
+  cx.fillRect(0, 0, w, h);
+  if (!spec || !state.fSpp) return;
+
+  const mg = spec.mag, nb = mg.length;
+  const binsPerPx = nb / w;
+  cx.strokeStyle = 'rgba(126,231,135,0.5)';
+  cx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const i0 = Math.floor(x * binsPerPx);
+    const i1 = Math.min(nb - 1, Math.floor((x + 1) * binsPerPx));
+    if (i0 > i1 || i0 >= nb) continue;
+    let mx = 0;
+    for (let i = i0; i <= i1; i++) if (mg[i] > mx) mx = mg[i];
+    const db = dbOfMag(mx);
+    if (db <= DB_FLOOR) continue;
+    const y = 3 + (-db / -DB_FLOOR) * (h - 6);
+    cx.moveTo(x + 0.5, y);
+    cx.lineTo(x + 0.5, h - 3);
+  }
+  cx.stroke();
+
+  const vx0 = state.fViewStart / nb * w;
+  const vx1 = Math.min(w, fBinAt(W()) / nb * w);
+  cx.strokeStyle = '#e8eaed';
+  cx.strokeRect(vx0 + 0.5, 0.5, Math.max(2, vx1 - vx0) - 1, h - 1);
+}
+
+function renderMinimapTime() {
+  const w = miniCv.clientWidth, h = miniCv.clientHeight;
+  const cx = miniCx;
+  cx.fillStyle = '#181b20';
+  cx.fillRect(0, 0, w, h);
+
+  const s = state.samples, n = s.length;
+  const sppMini = n / w;
+
+  cx.strokeStyle = 'rgba(86,182,240,0.5)';
+  cx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const i0 = Math.floor(x * sppMini);
+    const i1 = Math.min(n - 1, Math.floor((x + 1) * sppMini));
+    if (i0 > i1 || i0 >= n) continue;
+    let mn = s[i0], mx = s[i0];
+    for (let i = i0 + 1; i <= i1; i++) {
+      const v = s[i];
+      if (v < mn) mn = v;
+      if (v > mx) mx = v;
+    }
+    const y0 = h / 2 - mx * (h / 2 - 3);
+    const y1 = h / 2 - mn * (h / 2 - 3);
+    cx.moveTo(x + 0.5, y0 - 0.5);
+    cx.lineTo(x + 0.5, y1 + 0.5);
+  }
+  cx.stroke();
+
+  if (state.selection) {
+    cx.fillStyle = 'rgba(86,182,240,0.18)';
+    const x0 = state.selection.start / n * w, x1 = state.selection.end / n * w;
+    cx.fillRect(x0, 0, x1 - x0, h);
+  }
+
+  // viewport rectangle
+  const vx0 = state.viewStart / n * w;
+  const vx1 = Math.min(w, sampleAt(W()) / n * w);
+  cx.strokeStyle = '#e8eaed';
+  cx.strokeRect(vx0 + 0.5, 0.5, Math.max(2, vx1 - vx0) - 1, h - 1);
+
+  // live playhead
+  const pp = playPositionSample();
+  if (pp !== null) {
+    cx.strokeStyle = '#ff8c42';
+    const x = pp / n * w;
+    cx.beginPath();
+    cx.moveTo(x, 0); cx.lineTo(x, h);
+    cx.stroke();
+  }
+}
+
+/* ================= Status bar ================= */
+
+const stIdx = document.getElementById('stIdx');
+const stTime = document.getElementById('stTime');
+const stVal = document.getElementById('stVal');
+const stZoom = document.getElementById('stZoom');
+const stSel = document.getElementById('stSel');
+const stFmt = document.getElementById('stFmt');
+const lblIdx = document.getElementById('lblIdx');
+const lblTime = document.getElementById('lblTime');
+const lblVal = document.getElementById('lblVal');
+const fileLabel = document.getElementById('fileLabel');
+let lastStatus = '';
+
+function formatHz(hz) {
+  return hz >= 1000 ? (hz / 1000).toFixed(2) + ' kHz' : hz.toFixed(1) + ' Hz';
+}
+
+function updateStatus() {
+  let labels, parts;
+  const selPart = state.selection
+    ? `${state.selection.start}–${state.selection.end} (${state.selection.end - state.selection.start})`
+    : '–';
+  const fmtPart = `${state.sampleRate} Hz · ${state.bitDepth === 32 ? '32-bit float' : '16-bit PCM'}`;
+
+  if (state.view === 'freq') {
+    const bin = hover && hover.bin !== undefined ? hover.bin : null;
+    const hzPerBin = spec ? state.sampleRate / spec.n : 0;
+    const db = bin !== null && spec ? dbOfMag(spec.mag[bin]) : null;
+    labels = ['bin', 'f', 'mag'];
+    parts = [
+      bin !== null ? String(bin) : '–',
+      bin !== null ? formatHz(bin * hzPerBin) : '–',
+      db === null ? '–' : (db <= DB_FLOOR ? '−∞' : db.toFixed(1) + ' dB'),
+      state.fSpp
+        ? (1 / state.fSpp >= 1 ? (1 / state.fSpp).toFixed(1) + ' px/bin' : state.fSpp.toFixed(1) + ' bin/px')
+        : '–',
+      selPart, fmtPart,
+    ];
+  } else {
+    const idx = hover && hover.idx !== undefined ? hover.idx : null;
+    labels = ['idx', 't', 'val'];
+    parts = [
+      idx !== null ? String(idx) : '–',
+      idx !== null ? (idx / state.sampleRate * 1000).toFixed(2) + ' ms' : '–',
+      idx !== null ? state.samples[idx].toFixed(4) : '–',
+      1 / state.spp >= 1 ? (1 / state.spp).toFixed(1) + ' px/smp' : state.spp.toFixed(1) + ' smp/px',
+      selPart, fmtPart,
+    ];
+  }
+
+  const key = state.view + '|' + parts.join('|');
+  if (key === lastStatus) return;
+  lastStatus = key;
+  lblIdx.textContent = labels[0];
+  lblTime.textContent = labels[1];
+  lblVal.textContent = labels[2];
+  stIdx.textContent = parts[0];
+  stTime.textContent = parts[1];
+  stVal.textContent = parts[2];
+  stZoom.textContent = parts[3];
+  stSel.textContent = parts[4];
+  stFmt.textContent = parts[5];
+  fileLabel.textContent = `${state.filename} · ${(totalSamples() / state.sampleRate).toFixed(3)}s`;
+}
+
+/* ================= Toast ================= */
+
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+
+function toast(msg, isError) {
+  toastEl.textContent = msg;
+  toastEl.classList.toggle('error', !!isError);
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3500);
+}
+
+/* ================= File ops ================= */
+
+function loadModel(samples, sampleRate, bitDepth, filename) {
+  stopPlayback();
+  state.samples = samples;
+  state.sampleRate = sampleRate;
+  state.bitDepth = bitDepth;
+  state.filename = filename;
+  state.selection = null;
+  state.playhead = 0;
+  state.undoStack.length = 0;
+  state.redoStack.length = 0;
+  state.spp = fitSpp();
+  state.viewStart = 0;
+  spec = null;
+  specValid = false;
+  resynthDirty = false;
+  state.fSpp = null;
+  state.fViewStart = 0;
+}
+
+function newFile() {
+  const input = prompt(`Duration in seconds (max ${MAX_SECONDS}):`, String(MAX_SECONDS));
+  if (input === null) return;
+  const dur = parseFloat(input.replace(',', '.'));
+  if (!isFinite(dur) || dur <= 0) { toast('Invalid duration', true); return; }
+  const clamped = Math.min(MAX_SECONDS, dur);
+  loadModel(new Float32Array(Math.round(44100 * clamped)), 44100, 16, 'untitled.wav');
+}
+
+async function loadFile(file) {
+  try {
+    const buf = await file.arrayBuffer();
+    const { samples, sampleRate, bitDepth, warnings } = parseWav(buf);
+    if (!samples.length) { toast('File has no audio data', true); return; }
+    loadModel(samples, sampleRate, bitDepth, file.name);
+    if (warnings.length) toast(warnings.join(' · '));
+  } catch (err) {
+    toast(err.message, true);
+  }
+}
+
+function saveFile() {
+  flushResynth();
+  const buf = writeWav(state.samples, state.sampleRate, state.bitDepth);
+  const blob = new Blob([buf], { type: 'audio/wav' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = state.filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ================= Wave canvas gestures ================= */
+
+function canvasPos(e, cv) {
+  const r = cv.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+waveCv.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  const { x, y } = canvasPos(e, waveCv);
+
+  if (state.view === 'freq') {
+    if (!spec || !state.fSpp) return;
+    if (e.altKey) {
+      drag = { kind: 'panF', x0: x, view0: state.fViewStart };
+    } else if (state.tool === 'point') {
+      const bin = clampBin(Math.round(fBinAt(x)));
+      pushUndo();
+      spec.mag[bin] = magOfDb(yToDb(y));
+      resynthDirty = true;
+      drag = { kind: 'pointF', bin };
+      hover = { bin };
+    } else if (state.tool === 'pencil') {
+      const bin = clampBin(Math.round(fBinAt(x)));
+      const db = yToDb(y);
+      pushUndo();
+      spec.mag[bin] = magOfDb(db);
+      resynthDirty = true;
+      drag = { kind: 'pencilF', bin, db };
+      hover = { bin };
+    }
+    return; // select is disabled in the freq view
+  }
+
+  if (e.altKey) {
+    drag = { kind: 'pan', x0: x, view0: state.viewStart };
+    return;
+  }
+  if (state.tool === 'point') {
+    const idx = clampIdx(Math.round(sampleAt(x)));
+    pushUndo();
+    state.samples[idx] = yToVal(y);
+    markTimeEdited();
+    drag = { kind: 'point', idx };
+    hover = { idx };
+  } else if (state.tool === 'pencil') {
+    const idx = clampIdx(Math.round(sampleAt(x)));
+    const val = yToVal(y);
+    pushUndo();
+    state.samples[idx] = val;
+    markTimeEdited();
+    drag = { kind: 'pencil', idx, val };
+    hover = { idx };
+  } else if (state.tool === 'select') {
+    drag = { kind: 'select', anchor: sampleAt(x), x0: x, moved: false };
+  }
+});
+
+window.addEventListener('mousemove', e => {
+  const { x, y } = canvasPos(e, waveCv);
+
+  if (!drag && e.target === waveCv) {
+    hover = state.view === 'freq'
+      ? (spec ? { bin: clampBin(Math.round(fBinAt(x))) } : null)
+      : { idx: clampIdx(Math.round(sampleAt(x))) };
+  }
+  if (drag) {
+    if (drag.kind === 'pan') {
+      state.viewStart = clampView(drag.view0 + (drag.x0 - x) * state.spp);
+    } else if (drag.kind === 'panF') {
+      state.fViewStart = clampViewF(drag.view0 + (drag.x0 - x) * state.fSpp);
+    } else if (drag.kind === 'pointF') {
+      spec.mag[drag.bin] = magOfDb(yToDb(y));
+      resynthDirty = true;
+      hover = { bin: drag.bin };
+    } else if (drag.kind === 'pencilF') {
+      const bin = clampBin(Math.round(fBinAt(x)));
+      const db = yToDb(y);
+      drawLineBins(drag.bin, drag.db, bin, db);
+      drag.bin = bin;
+      drag.db = db;
+      hover = { bin };
+    } else if (drag.kind === 'point') {
+      state.samples[drag.idx] = yToVal(y);
+      markTimeEdited();
+      hover = { idx: drag.idx };
+    } else if (drag.kind === 'pencil') {
+      const idx = clampIdx(Math.round(sampleAt(x)));
+      const val = yToVal(y);
+      drawLineSamples(drag.idx, drag.val, idx, val);
+      drag.idx = idx;
+      drag.val = val;
+      hover = { idx };
+    } else if (drag.kind === 'select') {
+      if (Math.abs(x - drag.x0) > 3) drag.moved = true;
+      if (drag.moved) setSelection(drag.anchor, sampleAt(x));
+    }
+  }
+
+  if (rulerDrag) {
+    const rx = canvasPos(e, rulerCv).x;
+    if (Math.abs(rx - rulerDrag.x0) > 3) rulerDrag.moved = true;
+    if (rulerDrag.moved) setSelection(rulerDrag.anchor, sampleAt(rx));
+  }
+
+  if (miniDrag) {
+    const mx = canvasPos(e, miniCv).x;
+    const mw = miniCv.clientWidth;
+    if (miniDrag.freq) state.fViewStart = clampViewF((mx - miniDrag.grabOffset) / mw * binCount());
+    else state.viewStart = clampView((mx - miniDrag.grabOffset) / mw * totalSamples());
+  }
+});
+
+window.addEventListener('mouseup', e => {
+  if (drag && drag.kind === 'select' && !drag.moved) state.selection = null;
+  if (rulerDrag && !rulerDrag.moved) {
+    const { x } = canvasPos(e, rulerCv);
+    state.playhead = clampIdx(Math.round(sampleAt(x)));
+  }
+  drag = null;
+  rulerDrag = null;
+  miniDrag = null;
+});
+
+waveCv.addEventListener('mouseleave', () => { if (!drag) hover = null; });
+
+waveCv.addEventListener('wheel', e => {
+  e.preventDefault();
+  const { x } = canvasPos(e, waveCv);
+  if (state.view === 'freq') {
+    if (!spec || !state.fSpp) return;
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      state.fViewStart = clampViewF(state.fViewStart + e.deltaX * state.fSpp);
+    } else {
+      setZoomF(state.fSpp * Math.exp(e.deltaY * 0.002), fBinAt(x), x);
+    }
+    return;
+  }
+  if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+    state.viewStart = clampView(state.viewStart + e.deltaX * state.spp);
+  } else {
+    setZoom(state.spp * Math.exp(e.deltaY * 0.002), sampleAt(x), x);
+  }
+}, { passive: false });
+
+/* ================= Ruler / minimap gestures ================= */
+
+rulerCv.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  if (state.view !== 'time') return; // seek/select are time-domain gestures
+  const { x } = canvasPos(e, rulerCv);
+  rulerDrag = { anchor: sampleAt(x), x0: x, moved: false };
+});
+
+miniCv.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  const { x } = canvasPos(e, miniCv);
+  const w = miniCv.clientWidth;
+  if (state.view === 'freq') {
+    if (!spec || !state.fSpp) return;
+    const nb = binCount();
+    const viewLen = W() * state.fSpp;
+    const vx0 = state.fViewStart / nb * w;
+    const vx1 = (state.fViewStart + viewLen) / nb * w;
+    if (x < vx0 || x > vx1) state.fViewStart = clampViewF((x / w * nb) - viewLen / 2);
+    miniDrag = { freq: true, grabOffset: x - state.fViewStart / nb * w };
+  } else {
+    const n = totalSamples();
+    const viewLen = W() * state.spp;
+    const vx0 = state.viewStart / n * w;
+    const vx1 = (state.viewStart + viewLen) / n * w;
+    if (x < vx0 || x > vx1) state.viewStart = clampView((x / w * n) - viewLen / 2);
+    miniDrag = { freq: false, grabOffset: x - state.viewStart / n * w };
+  }
+});
+
+/* ================= Toolbar ================= */
+
+const btnPlay = document.getElementById('btnPlay');
+const btnLoop = document.getElementById('btnLoop');
+const fileInput = document.getElementById('fileInput');
+
+document.getElementById('btnNew').addEventListener('click', newFile);
+document.getElementById('btnLoad').addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) loadFile(fileInput.files[0]);
+  fileInput.value = '';
+});
+document.getElementById('btnSave').addEventListener('click', saveFile);
+btnPlay.addEventListener('click', togglePlay);
+btnLoop.addEventListener('click', () => {
+  state.loop = !state.loop;
+  btnLoop.classList.toggle('active', state.loop);
+  if (playback) playback.node.port.postMessage({ type: 'loop', loop: state.loop });
+});
+
+function setTool(t) {
+  state.tool = t;
+  for (const b of document.querySelectorAll('.tool')) b.classList.toggle('active', b.dataset.tool === t);
+}
+for (const btn of document.querySelectorAll('.tool')) {
+  btn.addEventListener('click', () => { if (!btn.disabled) setTool(btn.dataset.tool); });
+}
+setTool('point');
+
+const btnView = document.getElementById('btnView');
+const selectToolBtn = document.querySelector('.tool[data-tool="select"]');
+btnView.addEventListener('click', () => {
+  state.view = state.view === 'time' ? 'freq' : 'time';
+  btnView.classList.toggle('active', state.view === 'freq');
+  selectToolBtn.disabled = state.view === 'freq';
+  if (state.view === 'freq' && state.tool === 'select') setTool('point');
+  hover = null;
+});
+
+document.getElementById('btnZoomIn').addEventListener('click', () => {
+  if (state.view === 'freq') { if (state.fSpp) setZoomF(state.fSpp / 2, fBinAt(W() / 2), W() / 2); }
+  else setZoom(state.spp / 2, sampleAt(W() / 2), W() / 2);
+});
+document.getElementById('btnZoomOut').addEventListener('click', () => {
+  if (state.view === 'freq') { if (state.fSpp) setZoomF(state.fSpp * 2, fBinAt(W() / 2), W() / 2); }
+  else setZoom(state.spp * 2, sampleAt(W() / 2), W() / 2);
+});
+document.getElementById('btnZoomFit').addEventListener('click', () => {
+  if (state.view === 'freq') {
+    if (spec) { state.fSpp = fitFSpp(); state.fViewStart = 0; }
+  } else {
+    state.spp = fitSpp();
+    state.viewStart = 0;
+  }
+});
+document.getElementById('btnUndo').addEventListener('click', undo);
+document.getElementById('btnRedo').addEventListener('click', redo);
+
+/* ================= Keyboard ================= */
+
+window.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    togglePlay();
+  } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+    e.preventDefault();
+    if (e.shiftKey) redo(); else undo();
+  }
+});
+
+/* ================= Main loop ================= */
+
+function frame() {
+  resizeAll();
+  // freq view needs a valid spectrum working copy
+  if (state.view === 'freq' && (!spec || spec.n !== state.samples.length || !specValid)) {
+    spec = computeSpectrum(state.samples);
+    specValid = true;
+    if (state.fSpp === null) { state.fSpp = fitFSpp(); state.fViewStart = 0; }
+  }
+  // spectral edits → resynthesize the time buffer (at most once per frame)
+  flushResynth();
+  // push edited samples to the audio thread, at most once per frame
+  if (playback && audioDirty) {
+    playback.node.port.postMessage({ type: 'samples', samples: state.samples.slice() });
+    samplesPosts++;
+  }
+  audioDirty = false;
+  if (state.view === 'freq') renderSpectrum(); else renderWave();
+  renderRuler();
+  renderMinimap();
+  updateStatus();
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(() => {
+  resizeAll();
+  state.spp = fitSpp();
+  frame();
+});
+
+/* Debug/test handle (used by automated checks; harmless in normal use) */
+window.__wav = {
+  parseWav, writeWav, state, setZoom, setZoomF, computeSpectrum, resynthesize,
+  get spec() { return spec; },
+  get playback() { return playback; },
+  get samplesPosts() { return samplesPosts; },
+};
+</script>
+</body>
+</html>
