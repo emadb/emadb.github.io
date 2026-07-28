@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sonogram Painter</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23000'/%3E%3Cpath d='M2 11 Q6 4 9 7 T14 4' stroke='%23f2c464' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M2 13.5 H9' stroke='%23f2c464' stroke-width='1.2' opacity='.55' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="wordmark" aria-label="Sonogram Painter">
+      <span class="wordmark-strokes" aria-hidden="true">
+        <i></i><i></i><i></i>
+      </span>
+      <span class="wordmark-text">Sonogram&nbsp;Painter</span>
+    </div>
+    <div class="project-settings">
+      <label class="field-inline">
+        <span class="field-label">Project</span>
+        <input id="project-name" type="text" value="untitled" maxlength="60" spellcheck="false">
+      </label>
+      <label class="field-inline">
+        <span class="field-label">Duration</span>
+        <input id="project-duration" class="mono" type="number" value="10" min="1" max="60" step="1">
+        <span class="field-unit mono">s</span>
+      </label>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="toolbar" aria-label="Painting tools">
+      <h2 class="toolbar-title">Tools</h2>
+      <div class="tool-buttons" role="group" aria-label="Tool">
+        <button id="tool-brush" class="btn tool-btn">Brush</button>
+        <button id="tool-eraser" class="btn tool-btn">Eraser</button>
+        <button id="tool-line" class="btn tool-btn">Line</button>
+      </div>
+
+      <h2 class="toolbar-title">Brush</h2>
+      <div class="slider-row">
+        <div class="slider-head">
+          <span class="field-label">Size</span>
+          <span id="brush-size-value" class="slider-value mono">8</span>
+        </div>
+        <input id="brush-size" type="range" min="1" max="40" value="8">
+      </div>
+      <div class="slider-row">
+        <div class="slider-head">
+          <span class="field-label">Softness</span>
+          <span id="brush-softness-value" class="slider-value mono">0.5</span>
+        </div>
+        <input id="brush-softness" type="range" min="0" max="1" step="0.01" value="0.5">
+      </div>
+      <div class="slider-row">
+        <div class="slider-head">
+          <span class="field-label">Intensity</span>
+          <span id="brush-intensity-value" class="slider-value mono">1.0</span>
+        </div>
+        <input id="brush-intensity" type="range" min="0" max="1" step="0.01" value="1">
+      </div>
+
+      <h2 class="toolbar-title">Adjust</h2>
+      <div class="slider-row">
+        <div class="slider-head">
+          <span class="field-label">Gain</span>
+          <span id="adjust-gain-value" class="slider-value mono">1.0</span>
+        </div>
+        <input id="adjust-gain" type="range" min="0" max="2" step="0.01" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="slider-head">
+          <span class="field-label">Gamma</span>
+          <span id="adjust-gamma-value" class="slider-value mono">1.0</span>
+        </div>
+        <input id="adjust-gamma" type="range" min="0.2" max="5" step="0.01" value="1">
+      </div>
+
+      <h2 class="toolbar-title">Image</h2>
+      <button id="btn-import" class="btn">Import…</button>
+      <div class="slider-row">
+        <div class="slider-head">
+          <span class="field-label">Gamma</span>
+          <span id="img-gamma-value" class="slider-value mono">2.00</span>
+        </div>
+        <input id="img-gamma" type="range" min="0.2" max="5" step="0.01" value="2">
+      </div>
+      <label class="check-row">
+        <input id="img-invert" type="checkbox">
+        <span class="field-label">Invert</span>
+      </label>
+      <input id="file-image" type="file" accept="image/png,image/jpeg" hidden>
+
+      <div class="toolbar-spacer"></div>
+      <button id="btn-clear" class="btn">Clear</button>
+    </aside>
+
+    <section class="canvas-zone" aria-label="Spectrogram canvas">
+      <canvas id="sp-canvas" aria-label="Spectrogram canvas: paint on the time–frequency plane"></canvas>
+    </section>
+  </main>
+
+  <footer class="transport">
+    <button id="btn-play" class="btn btn-primary">Play</button>
+    <button id="btn-stop" class="btn" disabled>Stop</button>
+    <div id="time-readout" class="time-readout mono" aria-live="off">0:00.000</div>
+    <div class="transport-spacer"></div>
+    <span id="status" class="status" role="status" aria-live="polite"></span>
+    <button id="btn-open" class="btn">Open</button>
+    <button id="btn-save" class="btn">Save</button>
+    <button id="btn-export" class="btn">Export WAV</button>
+    <input id="file-open" type="file" accept="application/json,.json" hidden>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
