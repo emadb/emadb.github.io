@@ -1,11 +1,12 @@
-// Audio transport, adapted from Cloud Studio. The grid is rendered offline
-// into one mono buffer and played back from it, at the same 44.1 kHz the
-// WAV export uses — so what you hear is exactly what you export, and the
-// AudioContext resamples if its own rate differs.
+// Audio transport, adapted from Cloud Studio. The whole document (tonal +
+// noise grids) is rendered offline into one mono buffer and played back
+// from it, at the same 44.1 kHz the WAV export uses — so what you hear is
+// exactly what you export, and the AudioContext resamples if its own rate
+// differs.
 
-import { renderGrid, SAMPLE_RATE } from "./synth.js";
+import { renderDocument, SAMPLE_RATE } from "./synth.js";
 
-export function initPlayback({ getGrid, onTime, onStopped }) {
+export function initPlayback({ getDocument, onTime, onStopped }) {
   let audio = null;
   let source = null;
   let frame = 0;
@@ -41,7 +42,7 @@ export function initPlayback({ getGrid, onTime, onStopped }) {
     audio ??= new AudioContext();
     if (audio.state === "suspended") await audio.resume();
 
-    const rendered = renderGrid(getGrid(), {}, SAMPLE_RATE);
+    const rendered = renderDocument(getDocument(), SAMPLE_RATE);
     const buffer = audio.createBuffer(1, rendered.samples.length, SAMPLE_RATE);
     buffer.copyToChannel(rendered.samples, 0);
 

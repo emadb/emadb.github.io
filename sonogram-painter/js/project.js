@@ -1,12 +1,18 @@
-// Project save/load. The file is JSON tagged sonogram-painter/v1 with the
-// grid stored as a base64 PNG data URL: the grid is an image, and PNG
-// compresses silence to nothing. Loading shares the image importer's
-// decode path — a project file is "drop an image" plus metadata.
+// Project save/load. The file is JSON with each grid stored as a base64
+// PNG data URL: a grid is an image, and PNG compresses silence to
+// nothing. Loading shares the image importer's decode path — a project
+// file is "drop an image" plus metadata, once per grid.
+//
+// v2 added the noise grid alongside the tonal one. v1 files (a single
+// `grid` field, no noise) still open — the tonal grid comes from that
+// image, the noise grid starts empty but dimensionally in sync.
 
 import { createGrid } from "./grid.js";
 import { imageToGrid, loadImageUrl } from "./image.js";
 
-export const FORMAT = "sonogram-painter/v1";
+export const FORMAT_V1 = "sonogram-painter/v1";
+export const FORMAT_V2 = "sonogram-painter/v2";
+export const FORMAT = FORMAT_V2; // format written by toProjectJson
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
@@ -44,16 +50,26 @@ function gridToPngDataUrl(grid) {
 
 export function toProjectJson(state) {
   return JSON.stringify({
-    format: FORMAT,
+    format: FORMAT_V2,
     name: state.projectName,
     durationSec: state.durationSec,
-    grid: gridToPngDataUrl(state.grid),
+    tonalGrid: gridToPngDataUrl(state.tonalGrid),
+    noiseGrid: gridToPngDataUrl(state.noiseGrid),
   });
 }
 
+// Gamma 1, floor 0: an exact 8-bit round-trip, not a lossy image import.
+async function decodeGridPng(url, durationSec) {
+  if (!url.startsWith("data:image/")) throw new Error("project has no grid image");
+  const img = await loadImageUrl(url);
+  const grid = createGrid(durationSec);
+  imageToGrid(img, grid, { gamma: 1, invert: false, floor: 0 });
+  return grid;
+}
+
 // Parses and coerces a project file: wrong format throws, out-of-range
-// metadata clamps, and the PNG decodes through the image path with no
-// gamma and no silence floor — an exact 8-bit round-trip.
+// metadata clamps. Accepts both the current format and v1's single-grid
+// files.
 export async function fromProjectJson(text) {
   let data;
   try {
@@ -61,17 +77,20 @@ export async function fromProjectJson(text) {
   } catch {
     throw new Error("not a JSON file");
   }
-  if (data?.format !== FORMAT) throw new Error("not a sonogram-painter project");
+  if (data?.format !== FORMAT_V1 && data?.format !== FORMAT_V2) {
+    throw new Error("not a sonogram-painter project");
+  }
 
   const durationSec = clamp(Math.round(Number(data.durationSec)) || 10, 1, 60);
   const name =
     typeof data.name === "string" && data.name.trim() ? data.name.trim().slice(0, 60) : "untitled";
 
-  const url = String(data.grid ?? "");
-  if (!url.startsWith("data:image/")) throw new Error("project has no grid image");
-  const img = await loadImageUrl(url);
+  if (data.format === FORMAT_V1) {
+    const tonalGrid = await decodeGridPng(String(data.grid ?? ""), durationSec);
+    return { name, durationSec, tonalGrid, noiseGrid: createGrid(durationSec) };
+  }
 
-  const grid = createGrid(durationSec);
-  imageToGrid(img, grid, { gamma: 1, invert: false, floor: 0 });
-  return { name, durationSec, grid };
+  const tonalGrid = await decodeGridPng(String(data.tonalGrid ?? ""), durationSec);
+  const noiseGrid = await decodeGridPng(String(data.noiseGrid ?? ""), durationSec);
+  return { name, durationSec, tonalGrid, noiseGrid };
 }

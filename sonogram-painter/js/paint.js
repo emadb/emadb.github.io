@@ -4,9 +4,9 @@
 // release. The display refreshes once per animation frame, not per stamp,
 // and the brush outline follows the pointer.
 
-import { stampBrush, stampLine } from "./grid.js";
+import { stampBrush, stampHarmonic, stampLine } from "./grid.js";
 
-export function initPaint(canvasEl, canvas, getState, { onStrokeStart } = {}) {
+export function initPaint(canvasEl, canvas, getState) {
   let stroking = false;
   let lineFrom = null; // anchor cell while a straight line is being dragged
   let last = null; // fractional { row, col } of the previous stamp
@@ -27,15 +27,16 @@ export function initPaint(canvasEl, canvas, getState, { onStrokeStart } = {}) {
 
   // Pointer → fractional cell. Grid rows are uniform in log frequency and
   // the plot is log-frequency, so the mapping is linear in plot space.
+  // Both grids share dimensions, so the tonal grid's are as good as any.
   function toCell(e) {
     const rect = canvasEl.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const plot = canvas.getPlot();
-    const { grid } = getState();
+    const { tonalGrid } = getState();
     return {
-      col: ((x - plot.x) / plot.w) * grid.cols,
-      row: (1 - (y - plot.y) / plot.h) * grid.rows,
+      col: ((x - plot.x) / plot.w) * tonalGrid.cols,
+      row: (1 - (y - plot.y) / plot.h) * tonalGrid.rows,
       inside: x >= plot.x && x <= plot.x + plot.w && y >= plot.y && y <= plot.y + plot.h,
     };
   }
@@ -45,9 +46,29 @@ export function initPaint(canvasEl, canvas, getState, { onStrokeStart } = {}) {
     return { ...params, erase: tool === "eraser" };
   }
 
+  // Sine and Harmonic both paint the tonal grid (they differ in *how* a
+  // stroke is stamped, not *where*); Noise paints its own grid, its own
+  // engine entirely.
+  function activeGrid() {
+    const { material, tonalGrid, noiseGrid } = getState();
+    return material === "noise" ? noiseGrid : tonalGrid;
+  }
+
+  // The Harmonic material stamps a comb (fundamental + overtones) instead
+  // of a single point — but the eraser always stays a plain circular
+  // stamp: erasing removes what's there regardless of how it got painted.
+  function activeStamp() {
+    const { tool, material, harmonic } = getState();
+    if (tool !== "eraser" && material === "harmonic") {
+      return (grid, rowF, colF, b) => stampHarmonic(grid, rowF, colF, b, harmonic.partials, harmonic.falloff);
+    }
+    return stampBrush;
+  }
+
   function updateCursor(cell) {
     const b = brush();
-    canvas.setCursor({ rowF: cell.row, colF: cell.col, radius: b.size, erase: b.erase });
+    const { material } = getState();
+    canvas.setCursor({ rowF: cell.row, colF: cell.col, radius: b.size, erase: b.erase, material });
   }
 
   canvasEl.addEventListener("pointerdown", (e) => {
@@ -56,13 +77,13 @@ export function initPaint(canvasEl, canvas, getState, { onStrokeStart } = {}) {
     if (!cell.inside) return;
     canvasEl.setPointerCapture(e.pointerId);
     stroking = true;
-    onStrokeStart?.();
+    const { material } = getState();
     if (getState().tool === "line" || e.shiftKey) {
       lineFrom = cell;
-      canvas.setLinePreview({ from: cell, to: cell });
+      canvas.setLinePreview({ from: cell, to: cell, material });
     } else {
       last = cell;
-      stampBrush(getState().grid, cell.row, cell.col, brush());
+      activeStamp()(activeGrid(), cell.row, cell.col, brush());
       refreshSoon();
     }
     updateCursor(cell);
@@ -72,9 +93,9 @@ export function initPaint(canvasEl, canvas, getState, { onStrokeStart } = {}) {
     const cell = toCell(e);
     if (stroking) {
       if (lineFrom) {
-        canvas.setLinePreview({ from: lineFrom, to: cell });
+        canvas.setLinePreview({ from: lineFrom, to: cell, material: getState().material });
       } else {
-        stampLine(getState().grid, last, cell, brush());
+        stampLine(activeGrid(), last, cell, brush(), activeStamp());
         last = cell;
         refreshSoon();
       }
@@ -87,7 +108,7 @@ export function initPaint(canvasEl, canvas, getState, { onStrokeStart } = {}) {
     if (!stroking) return;
     stroking = false;
     if (lineFrom) {
-      stampLine(getState().grid, lineFrom, toCell(e), brush());
+      stampLine(activeGrid(), lineFrom, toCell(e), brush(), activeStamp());
       lineFrom = null;
       canvas.setLinePreview(null);
     }

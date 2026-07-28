@@ -30,30 +30,29 @@ function timeStep(duration) {
   return TIME_STEPS.find((s) => s >= target) ?? Math.ceil(target);
 }
 
-// Amplitude → light. A display-only gamma lifts faint cells into
-// visibility; the ramp runs black → warm gold → white so a partial at
-// full amplitude glows hot.
-const GOLD = [242, 196, 100];
+// Amplitude → light, one ramp per palette material: black → hue → white,
+// so a cell at full amplitude glows hot regardless of which grid it's on.
+// Tonal (Sine + Harmonic) stays the original warm gold; Noise gets a cool
+// teal — the palette becomes visible in the picture itself. Overlapping
+// content from both grids adds channel-by-channel (clamped), the same
+// "brightens where it overlaps" idea Cloud Studio uses for its clouds.
+export const TONAL_COLOR = [242, 196, 100];
+export const NOISE_COLOR = [80, 210, 220];
 const KNEE = 0.75;
 
-function writeAmpPixel(px, at, v) {
+function addAmpColor(rgb, v, hue) {
   const t = Math.pow(clamp(v, 0, 1), 0.7);
-  let r, g, b;
   if (t <= KNEE) {
     const u = t / KNEE;
-    r = GOLD[0] * u;
-    g = GOLD[1] * u;
-    b = GOLD[2] * u;
+    rgb[0] += hue[0] * u;
+    rgb[1] += hue[1] * u;
+    rgb[2] += hue[2] * u;
   } else {
     const u = (t - KNEE) / (1 - KNEE);
-    r = GOLD[0] + (255 - GOLD[0]) * u;
-    g = GOLD[1] + (255 - GOLD[1]) * u;
-    b = GOLD[2] + (255 - GOLD[2]) * u;
+    rgb[0] += hue[0] + (255 - hue[0]) * u;
+    rgb[1] += hue[1] + (255 - hue[1]) * u;
+    rgb[2] += hue[2] + (255 - hue[2]) * u;
   }
-  px[at] = r;
-  px[at + 1] = g;
-  px[at + 2] = b;
-  px[at + 3] = 255;
 }
 
 export function initCanvas(canvasEl, getState) {
@@ -79,27 +78,41 @@ export function initCanvas(canvasEl, getState) {
   const yToFreq = (y) =>
     F_MIN * Math.exp((1 - clamp((y - plot.y) / plot.h, 0, 1)) * LOG_SPAN);
 
-  function rebuildGridImage(grid) {
-    off.width = grid.cols;
-    off.height = grid.rows;
-    const img = offCtx.createImageData(grid.cols, grid.rows);
+  // previewAdjust reshapes the combined picture: both grids, same formula
+  // the destructive commit applies, so the preview looks exactly like the
+  // commit will.
+  function rebuildGridImage(tonalGrid, noiseGrid) {
+    const { cols, rows } = tonalGrid;
+    off.width = cols;
+    off.height = rows;
+    const img = offCtx.createImageData(cols, rows);
     const px = img.data;
     gridEmpty = true;
-    for (let row = 0; row < grid.rows; row++) {
-      const y = grid.rows - 1 - row; // row 0 (lowest band) at the bottom
-      const rowBase = row * grid.cols;
-      const pxBase = y * grid.cols * 4;
-      for (let col = 0; col < grid.cols; col++) {
-        let v = grid.data[rowBase + col];
-        if (v > 0 && previewAdjust) {
-          v = Math.min(1, previewAdjust.gain * Math.pow(v, previewAdjust.gamma));
+    for (let row = 0; row < rows; row++) {
+      const y = rows - 1 - row; // row 0 (lowest band) at the bottom
+      const rowBase = row * cols;
+      const pxBase = y * cols * 4;
+      for (let col = 0; col < cols; col++) {
+        let vTonal = tonalGrid.data[rowBase + col];
+        if (vTonal > 0 && previewAdjust) {
+          vTonal = Math.min(1, previewAdjust.gain * Math.pow(vTonal, previewAdjust.gamma));
         }
-        if (v > 0) {
+        let vNoise = noiseGrid.data[rowBase + col];
+        if (vNoise > 0 && previewAdjust) {
+          vNoise = Math.min(1, previewAdjust.gain * Math.pow(vNoise, previewAdjust.gamma));
+        }
+
+        const at = pxBase + col * 4;
+        if (vTonal > 0 || vNoise > 0) {
           gridEmpty = false;
-          writeAmpPixel(px, pxBase + col * 4, v);
-        } else {
-          px[pxBase + col * 4 + 3] = 255;
+          const rgb = [0, 0, 0];
+          if (vTonal > 0) addAmpColor(rgb, vTonal, TONAL_COLOR);
+          if (vNoise > 0) addAmpColor(rgb, vNoise, NOISE_COLOR);
+          px[at] = Math.min(255, rgb[0]);
+          px[at + 1] = Math.min(255, rgb[1]);
+          px[at + 2] = Math.min(255, rgb[2]);
         }
+        px[at + 3] = 255;
       }
     }
     offCtx.putImageData(img, 0, 0);
@@ -161,9 +174,9 @@ export function initCanvas(canvasEl, getState) {
       h: Math.max(1, h - MARGIN.top - MARGIN.bottom),
     };
 
-    const { grid } = getState();
-    if (grid) {
-      if (gridDirty) rebuildGridImage(grid);
+    const { tonalGrid, noiseGrid } = getState();
+    if (tonalGrid && noiseGrid) {
+      if (gridDirty) rebuildGridImage(tonalGrid, noiseGrid);
       // Nearest-neighbour scaling: crisp cells are part of the instrument.
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(off, plot.x, plot.y, plot.w, plot.h);
@@ -172,10 +185,10 @@ export function initCanvas(canvasEl, getState) {
     drawGrid();
 
     // Straight-line preview: the committed stroke will run center to center.
-    if (linePreview && grid) {
+    if (linePreview && tonalGrid) {
       const toXY = (c) => [
-        plot.x + (c.col / grid.cols) * plot.w,
-        plot.y + (1 - c.row / grid.rows) * plot.h,
+        plot.x + (c.col / tonalGrid.cols) * plot.w,
+        plot.y + (1 - c.row / tonalGrid.rows) * plot.h,
       ];
       ctx.save();
       ctx.beginPath();
@@ -185,7 +198,8 @@ export function initCanvas(canvasEl, getState) {
       ctx.moveTo(...toXY(linePreview.from));
       ctx.lineTo(...toXY(linePreview.to));
       ctx.setLineDash([5, 4]);
-      ctx.strokeStyle = "rgba(242, 196, 100, 0.8)";
+      const lineHue = linePreview.material === "noise" ? NOISE_COLOR : TONAL_COLOR;
+      ctx.strokeStyle = `rgba(${lineHue.join(", ")}, 0.8)`;
       ctx.lineWidth = 1;
       ctx.stroke();
       ctx.setLineDash([]);
@@ -193,9 +207,9 @@ export function initCanvas(canvasEl, getState) {
     }
 
     // Brush outline: an ellipse, because grid cells aren't square on screen.
-    if (cursor && grid) {
-      const cw = plot.w / grid.cols;
-      const ch = plot.h / grid.rows;
+    if (cursor && tonalGrid) {
+      const cw = plot.w / tonalGrid.cols;
+      const ch = plot.h / tonalGrid.rows;
       ctx.save();
       ctx.beginPath();
       ctx.rect(plot.x, plot.y, plot.w, plot.h);
@@ -203,14 +217,15 @@ export function initCanvas(canvasEl, getState) {
       ctx.beginPath();
       ctx.ellipse(
         plot.x + cursor.colF * cw,
-        plot.y + (grid.rows - cursor.rowF) * ch,
+        plot.y + (tonalGrid.rows - cursor.rowF) * ch,
         cursor.radius * cw,
         cursor.radius * ch,
         0,
         0,
         Math.PI * 2,
       );
-      ctx.strokeStyle = cursor.erase ? "rgba(224, 113, 106, 0.9)" : "rgba(242, 196, 100, 0.9)";
+      const cursorHue = cursor.material === "noise" ? NOISE_COLOR : TONAL_COLOR;
+      ctx.strokeStyle = cursor.erase ? "rgba(224, 113, 106, 0.9)" : `rgba(${cursorHue.join(", ")}, 0.9)`;
       ctx.lineWidth = 1;
       ctx.stroke();
       ctx.restore();
@@ -226,7 +241,7 @@ export function initCanvas(canvasEl, getState) {
       ctx.stroke();
     }
 
-    if (!grid || gridEmpty) {
+    if (!tonalGrid || gridEmpty) {
       ctx.fillStyle = COLOR.empty;
       ctx.font = "13px 'IBM Plex Mono', monospace";
       ctx.textAlign = "center";

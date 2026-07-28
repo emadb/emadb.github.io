@@ -2,78 +2,36 @@
 
 import { initCanvas } from "./canvas.js";
 import { imageToGrid, loadImageFile } from "./image.js";
-import {
-  COLUMNS_PER_SECOND,
-  ROWS,
-  adjustGrid,
-  createGrid,
-  resizeGrid,
-  stampDefaultDocument,
-} from "./grid.js";
-import { isTextEntryTarget, isTypingTarget } from "./keys.js";
+import { adjustGrid, createGrid, resizeGrid, stampDefaultDocument } from "./grid.js";
+import { isTypingTarget } from "./keys.js";
 import { initPaint } from "./paint.js";
 import { fileSlug, fromProjectJson, timeStamp, toProjectJson } from "./project.js";
 import { initPlayback } from "./playback.js";
-import { renderGrid, SAMPLE_RATE } from "./synth.js";
+import { renderDocument, SAMPLE_RATE } from "./synth.js";
 import { downloadBlob, encodeWav } from "./wav.js";
 
 const state = {
   projectName: "untitled",
   durationSec: 10,
-  grid: createGrid(10),
+  // Two same-sized grids: the tonal grid (Sine + Harmonic material,
+  // played by the sine bank) and the noise grid (its own engine, added
+  // in item 14). The noise grid is inert for now — always empty, always
+  // resized alongside the tonal one so the two never drift apart in size.
+  tonalGrid: createGrid(10),
+  noiseGrid: createGrid(10),
   tool: "brush",
   brush: { size: 8, softness: 0.5, intensity: 1 },
+  // The palette entry says *with what* you paint; the tool says *how*.
+  material: "sine",
+  harmonic: { partials: 5, falloff: 1.5 },
+  noise: { q: 3 },
 };
 
-stampDefaultDocument(state.grid);
+stampDefaultDocument(state.tonalGrid);
 
 const canvasEl = document.getElementById("sp-canvas");
 const canvas = initCanvas(canvasEl, () => state);
-
-// --- undo/redo: whole-grid snapshots, pushed before every mutation ---
-
-const UNDO_CAP = 30;
-const undoStack = [];
-const redoStack = [];
-
-const snapshot = () => ({ cols: state.grid.cols, data: state.grid.data.slice() });
-
-function pushUndo() {
-  undoStack.push(snapshot());
-  if (undoStack.length > UNDO_CAP) undoStack.shift();
-  redoStack.length = 0;
-}
-
-// A snapshot's column count implies its duration, so undoing across a
-// duration change restores the input field too.
-function restore(snap) {
-  state.grid = { cols: snap.cols, rows: ROWS, data: snap.data };
-  state.durationSec = Math.round(snap.cols / COLUMNS_PER_SECOND);
-  durationInput.value = String(state.durationSec);
-  playback.stop();
-  canvas.invalidateGrid();
-}
-
-function undo() {
-  if (!undoStack.length) return;
-  redoStack.push(snapshot());
-  restore(undoStack.pop());
-}
-
-function redo() {
-  if (!redoStack.length) return;
-  undoStack.push(snapshot());
-  restore(redoStack.pop());
-}
-
-window.addEventListener("keydown", (e) => {
-  if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "z" || isTextEntryTarget(e.target)) return;
-  e.preventDefault();
-  if (e.shiftKey) redo();
-  else undo();
-});
-
-initPaint(canvasEl, canvas, () => state, { onStrokeStart: pushUndo });
+initPaint(canvasEl, canvas, () => state);
 
 // --- toolbar ---
 
@@ -95,6 +53,36 @@ for (const [name, btn] of Object.entries(toolButtons)) {
 }
 selectTool("brush");
 
+// --- palette ---
+
+const materialButtons = {
+  sine: document.getElementById("material-sine"),
+  harmonic: document.getElementById("material-harmonic"),
+  noise: document.getElementById("material-noise"),
+};
+
+// Each material's own sliders only take up space while that material is
+// selected — Falloff means nothing while painting Sine, so it shouldn't
+// sit on screen (and in the way) all the time.
+const harmonicSliderRows = ["harmonic-partials", "harmonic-falloff"].map((id) =>
+  document.getElementById(id).closest(".slider-row"),
+);
+const noiseSliderRows = ["noise-q"].map((id) => document.getElementById(id).closest(".slider-row"));
+
+function selectMaterial(material) {
+  state.material = material;
+  for (const [name, btn] of Object.entries(materialButtons)) {
+    btn.classList.toggle("active", name === material);
+  }
+  for (const row of harmonicSliderRows) row.hidden = material !== "harmonic";
+  for (const row of noiseSliderRows) row.hidden = material !== "noise";
+}
+
+for (const [name, btn] of Object.entries(materialButtons)) {
+  btn.addEventListener("click", () => selectMaterial(name));
+}
+selectMaterial("sine");
+
 // Each slider drives one brush parameter and its value label.
 function bindSlider(id, format, apply) {
   const input = document.getElementById(id);
@@ -111,6 +99,10 @@ function bindSlider(id, format, apply) {
 bindSlider("brush-size", (v) => String(v), (v) => (state.brush.size = v));
 bindSlider("brush-softness", (v) => v.toFixed(2), (v) => (state.brush.softness = v));
 bindSlider("brush-intensity", (v) => v.toFixed(2), (v) => (state.brush.intensity = v));
+
+bindSlider("harmonic-partials", (v) => String(v), (v) => (state.harmonic.partials = v));
+bindSlider("harmonic-falloff", (v) => v.toFixed(1), (v) => (state.harmonic.falloff = v));
+bindSlider("noise-q", (v) => v.toFixed(1), (v) => (state.noise.q = v));
 
 // Keyboard shortcuts: B/E swap tool, [ and ] step the brush size — the
 // bracket keys nudge the same slider a stroke would, so the displayed
@@ -149,8 +141,8 @@ window.addEventListener("keydown", (e) => {
 });
 
 // Gain/gamma preview live while a slider moves and commit destructively
-// (undoable) on release, then snap back to neutral: they apply an
-// adjustment, they don't hold a setting.
+// on release, then snap back to neutral: they apply an adjustment, they
+// don't hold a setting.
 const gainInput = document.getElementById("adjust-gain");
 const gammaInput = document.getElementById("adjust-gamma");
 const gainLabel = document.getElementById("adjust-gain-value");
@@ -166,8 +158,9 @@ function commitAdjust() {
   const gain = Number(gainInput.value);
   const gamma = Number(gammaInput.value);
   if (gain !== 1 || gamma !== 1) {
-    pushUndo();
-    adjustGrid(state.grid, gain, gamma);
+    // Applies to the combined picture — both grids, not just the tonal one.
+    adjustGrid(state.tonalGrid, gain, gamma);
+    adjustGrid(state.noiseGrid, gain, gamma);
   }
   gainInput.value = "1";
   gammaInput.value = "1";
@@ -185,8 +178,8 @@ for (const input of [gainInput, gammaInput]) {
 // --- image import ---
 
 // The last imported image is kept so gamma/invert can be re-applied to it;
-// each application replaces the grid (undoable), then painting continues
-// on top as normal content.
+// each application replaces the grid, then painting continues on top as
+// normal content.
 let lastImage = null;
 
 const imgGammaInput = document.getElementById("img-gamma");
@@ -195,8 +188,7 @@ const imgInvertInput = document.getElementById("img-invert");
 
 function applyImage() {
   if (!lastImage) return;
-  pushUndo();
-  imageToGrid(lastImage, state.grid, {
+  imageToGrid(lastImage, state.tonalGrid, {
     gamma: Number(imgGammaInput.value),
     invert: imgInvertInput.checked,
   });
@@ -239,8 +231,8 @@ document.querySelector(".canvas-zone").addEventListener("drop", (e) => {
 
 const btnClear = document.getElementById("btn-clear");
 btnClear.addEventListener("click", () => {
-  pushUndo();
-  state.grid.data.fill(0);
+  state.tonalGrid.data.fill(0);
+  state.noiseGrid.data.fill(0);
   canvas.invalidateGrid();
 });
 
@@ -258,9 +250,9 @@ durationInput.addEventListener("change", () => {
   const next = Number.isFinite(v) ? Math.min(60, Math.max(1, v)) : 10;
   durationInput.value = String(next);
   if (next === state.durationSec) return;
-  pushUndo();
   state.durationSec = next;
-  state.grid = resizeGrid(state.grid, next);
+  state.tonalGrid = resizeGrid(state.tonalGrid, next);
+  state.noiseGrid = resizeGrid(state.noiseGrid, next);
   playback.stop();
   canvas.invalidateGrid();
 });
@@ -288,7 +280,7 @@ function formatTime(t) {
 }
 
 const playback = initPlayback({
-  getGrid: () => state.grid,
+  getDocument: () => ({ tonalGrid: state.tonalGrid, noiseGrid: state.noiseGrid, noiseSettings: state.noise }),
   onTime(t) {
     timeReadout.textContent = formatTime(t);
     canvas.setPlayhead(t);
@@ -346,11 +338,11 @@ fileOpenInput.addEventListener("change", async () => {
   if (!file) return;
   try {
     const loaded = await fromProjectJson(await file.text());
-    pushUndo();
     playback.stop();
     state.projectName = loaded.name;
     state.durationSec = loaded.durationSec;
-    state.grid = loaded.grid;
+    state.tonalGrid = loaded.tonalGrid;
+    state.noiseGrid = loaded.noiseGrid;
     nameInput.value = loaded.name;
     durationInput.value = String(loaded.durationSec);
     canvas.invalidateGrid();
@@ -366,7 +358,10 @@ btnExport.addEventListener("click", async () => {
   btnExport.textContent = "Rendering…";
   await nextPaint();
   try {
-    const rendered = renderGrid(state.grid, {}, SAMPLE_RATE);
+    const rendered = renderDocument(
+      { tonalGrid: state.tonalGrid, noiseGrid: state.noiseGrid, noiseSettings: state.noise },
+      SAMPLE_RATE,
+    );
     const name = `sonogram-${fileSlug(state.projectName)}-${timeStamp()}.wav`;
     // Mono engine, stereo WAV: the same signal on both channels.
     downloadBlob(encodeWav(rendered.samples, rendered.samples, rendered.sampleRate), name);

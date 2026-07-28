@@ -60,16 +60,35 @@ export function stampBrush(grid, rowF, colF, brush) {
   }
 }
 
-// Stamps the brush along a straight segment in cell space, stepping at
-// ~40% of the radius: dense enough to read as one continuous mark,
-// sparse enough that a long stroke stays cheap.
-export function stampLine(grid, from, to, brush) {
+// Stamps along a straight segment in cell space, stepping at ~40% of the
+// radius: dense enough to read as one continuous mark, sparse enough that
+// a long stroke stays cheap. Takes the point stamp function to use, so
+// freehand and line/shift-drag share one path for both plain and
+// harmonic strokes.
+export function stampLine(grid, from, to, brush, stamp = stampBrush) {
   const step = Math.max(0.5, brush.size * 0.4);
   const dist = Math.hypot(to.row - from.row, to.col - from.col);
   const steps = Math.max(1, Math.ceil(dist / step));
   for (let i = 0; i <= steps; i++) {
     const u = i / steps;
-    stampBrush(grid, from.row + (to.row - from.row) * u, from.col + (to.col - from.col) * u, brush);
+    stamp(grid, from.row + (to.row - from.row) * u, from.col + (to.col - from.col) * u, brush);
+  }
+}
+
+// A harmonic stroke paints, it doesn't synthesize: the fundamental row at
+// full brush strength, plus overtone rows at 2f, 3f, 4f… each dimmer by
+// 1/n^falloff. Rows are uniform in log frequency, so multiplying a
+// frequency by n is just a fixed additive row offset — no rowToFreq/
+// freqToRow round trip needed. Still the tonal grid, still played back
+// unchanged by the sine bank; "what you see is what you hear" stays true,
+// it just draws a comb of parallel lines instead of one.
+export function stampHarmonic(grid, rowF, colF, brush, partials, falloff) {
+  const n = Math.max(1, Math.round(partials));
+  for (let harmonic = 1; harmonic <= n; harmonic++) {
+    const partialRow = rowF + BANDS_PER_OCTAVE * Math.log2(harmonic);
+    if (partialRow > grid.rows - 1) break; // above the plane's ceiling: not stamped
+    const amp = harmonic === 1 ? 1 : 1 / harmonic ** falloff;
+    stampBrush(grid, partialRow, colF, { ...brush, intensity: brush.intensity * amp });
   }
 }
 
