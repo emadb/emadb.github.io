@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Causal Reverser</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 10.5c2-5 4-7 6-7' fill='none' stroke='%23a78bfa' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M6 2 8.4 3.5 6.6 5.8' fill='none' stroke='%23a78bfa' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14 5.5c-2 5-4 7-6 7' fill='none' stroke='%23a78bfa' stroke-width='1.6' stroke-linecap='round' opacity='.85'/%3E%3Cpath d='M10 14 7.6 12.5 9.4 10.2' fill='none' stroke='%23a78bfa' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' opacity='.85'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="wordmark" aria-label="Causal Reverser">
+      <span class="wordmark-glyph" aria-hidden="true">&#8644;</span>
+      <span class="wordmark-text">Causal&nbsp;Reverser</span>
+    </div>
+    <div class="project-settings">
+      <label class="field-inline">
+        <span class="field-label">Project</span>
+        <input id="project-name" type="text" value="untitled" maxlength="60" spellcheck="false">
+      </label>
+      <label class="field-inline">
+        <span class="field-label">Duration</span>
+        <input id="project-duration" class="mono" type="number" value="10" min="1" max="300" step="1" disabled>
+        <span class="field-unit mono">s</span>
+      </label>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section class="canvas-zone source-zone" aria-label="Source waveform">
+      <canvas id="source-canvas" aria-label="Source waveform: events and their roles"></canvas>
+      <canvas id="energy-canvas" aria-label="Onset energy lane"></canvas>
+      <div id="source-meta" class="source-meta" hidden></div>
+      <button id="btn-fit-source" class="btn btn-fit" hidden>Fit</button>
+      <div id="source-empty" class="empty-state">
+        <p>No source loaded.</p>
+        <p class="empty-hint">Drop a WAV file here, or use Open below.<br>Up to 5 minutes, first channel only.</p>
+      </div>
+    </section>
+
+    <section class="canvas-zone score-zone" aria-label="Causal score">
+      <canvas id="score-canvas" aria-label="Causal score: output timeline"></canvas>
+      <button id="btn-fit-score" class="btn btn-fit" hidden>Fit</button>
+      <div id="score-empty" class="empty-state">
+        <p>The causal score is empty.</p>
+        <p class="empty-hint">Pick a causal law or drag source material in once a WAV is loaded.</p>
+      </div>
+    </section>
+
+    <canvas id="link-canvas" class="link-overlay" aria-hidden="true"></canvas>
+
+    <aside class="inspector" aria-label="Causality inspector">
+      <div class="field-group">Onset analysis</div>
+      <div class="slider-row">
+        <div class="slider-head">
+          <span class="field-name">Sensitivity</span>
+          <span id="sensitivity-value" class="slider-value mono">0.50</span>
+        </div>
+        <input id="sensitivity-slider" type="range" min="0" max="1" step="0.01" value="0.5" disabled>
+      </div>
+      <div class="slider-row">
+        <div class="slider-head">
+          <span class="field-name">Min gap</span>
+          <span id="min-gap-value" class="slider-value mono">80 ms</span>
+        </div>
+        <input id="min-gap-slider" type="range" min="10" max="500" step="10" value="80" disabled>
+      </div>
+      <p id="event-count" class="inspector-empty">No source loaded.</p>
+
+      <h2 class="inspector-title">Causal law</h2>
+      <div class="mode-select">
+        <select id="mode-select" disabled>
+          <option value="manual">Manual</option>
+          <option value="premonition">Premonition</option>
+          <option value="exploded">Exploded Event</option>
+          <option value="impossible">Impossible Materials</option>
+        </select>
+      </div>
+
+      <div class="causality-field" aria-label="Before cause / after cause, intact / fragmented">
+        <div id="causality-field-pad" class="causality-field-pad">
+          <div id="causality-field-dot" class="causality-field-dot" hidden></div>
+        </div>
+        <span class="field-axis field-axis-left">before cause</span>
+        <span class="field-axis field-axis-right">after cause</span>
+        <span class="field-axis field-axis-top">fragmented</span>
+        <span class="field-axis field-axis-bottom">intact</span>
+      </div>
+
+      <p id="mode-empty" class="inspector-empty">Load a WAV to inspect events and choose a causal law.</p>
+
+      <div id="fields-premonition" class="inspector-fields" hidden>
+        <div class="slider-row">
+          <div class="slider-head">
+            <span class="field-name">Lead time</span>
+            <span id="premonition-lead-value" class="slider-value mono">150 ms</span>
+          </div>
+          <input id="premonition-lead" type="range" min="20" max="800" step="10" value="150">
+        </div>
+        <div class="slider-row">
+          <div class="slider-head">
+            <span class="field-name">Probability</span>
+            <span id="premonition-probability-value" class="slider-value mono">1.00</span>
+          </div>
+          <input id="premonition-probability" type="range" min="0" max="1" step="0.05" value="1">
+        </div>
+        <div class="field-row">
+          <span class="field-name">Tail</span>
+          <div class="field-control">
+            <select id="premonition-tail">
+              <option value="forward">Forward</option>
+              <option value="reversed">Reversed</option>
+              <option value="split">Split</option>
+            </select>
+          </div>
+        </div>
+        <div class="slider-row">
+          <div class="slider-head">
+            <span class="field-name">False omen</span>
+            <span id="premonition-false-omen-value" class="slider-value mono">0.15</span>
+          </div>
+          <input id="premonition-false-omen" type="range" min="0" max="1" step="0.05" value="0.15">
+        </div>
+        <div class="field-row">
+          <span class="field-name">Seed</span>
+          <div class="field-control">
+            <input id="premonition-seed" class="mono" type="number" value="1" min="0" max="999999" step="1">
+          </div>
+        </div>
+        <button id="btn-generate-premonition" class="btn btn-primary btn-generate">Generate Premonition</button>
+      </div>
+
+      <div id="fields-exploded" class="inspector-fields" hidden>
+        <div class="field-row">
+          <span class="field-name">Role order</span>
+          <div class="field-control">
+            <select id="exploded-role-order">
+              <option value="reb">Resonance → Excitation → Body</option>
+              <option value="febr">Foreshadow → Excitation → Body → Resonance</option>
+              <option value="random">Random</option>
+            </select>
+          </div>
+        </div>
+        <div class="slider-row">
+          <div class="slider-head">
+            <span class="field-name">Radius</span>
+            <span id="exploded-radius-value" class="slider-value mono">40 ms</span>
+          </div>
+          <input id="exploded-radius" type="range" min="0" max="300" step="5" value="40">
+        </div>
+        <div class="field-row">
+          <span class="field-name">Quantize</span>
+          <div class="field-control">
+            <input id="exploded-quantize-enabled" type="checkbox">
+          </div>
+        </div>
+        <div class="slider-row">
+          <div class="slider-head">
+            <span class="field-name">Grid</span>
+            <span id="exploded-grid-value" class="slider-value mono">125 ms</span>
+          </div>
+          <input id="exploded-grid" type="range" min="25" max="500" step="5" value="125">
+        </div>
+        <div class="field-row">
+          <span class="field-name">Collision</span>
+          <div class="field-control">
+            <select id="exploded-collision">
+              <option value="layer">Layer (allow overlap)</option>
+              <option value="push-apart">Push apart (no overlap)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-name">Seed</span>
+          <div class="field-control">
+            <input id="exploded-seed" class="mono" type="number" value="1" min="0" max="999999" step="1">
+          </div>
+        </div>
+        <button id="btn-generate-exploded" class="btn btn-primary btn-generate">Generate Exploded Event</button>
+      </div>
+
+      <div id="fields-impossible" class="inspector-fields" hidden>
+        <div class="field-row">
+          <span class="field-name">Role</span>
+          <div class="field-control">
+            <select id="impossible-role">
+              <option value="foreshadow">Foreshadow</option>
+              <option value="excitation">Excitation</option>
+              <option value="body">Body</option>
+              <option value="resonance" selected>Resonance</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-name">Match by</span>
+          <div class="field-control">
+            <select id="impossible-strategy">
+              <option value="chronological">Chronological neighbor</option>
+              <option value="random">Random event</option>
+              <option value="similar-duration">Similar duration</option>
+              <option value="opposite-duration">Opposite duration</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-name">Seed</span>
+          <div class="field-control">
+            <input id="impossible-seed" class="mono" type="number" value="1" min="0" max="999999" step="1">
+          </div>
+        </div>
+        <button id="btn-generate-impossible" class="btn btn-primary btn-generate">Generate Impossible Materials</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="transport">
+    <button id="btn-open" class="btn btn-primary">Open WAV</button>
+    <button id="btn-play-source" class="btn" disabled>Play Source</button>
+    <button id="btn-play-score" class="btn" disabled>Play Score</button>
+    <button id="btn-stop" class="btn" disabled>Stop</button>
+    <div id="time-readout" class="time-readout mono" aria-live="off">0:00.000</div>
+    <div class="transport-spacer"></div>
+    <span id="status" class="status" role="status" aria-live="polite"></span>
+    <button id="btn-load" class="btn">Load Project</button>
+    <button id="btn-save" class="btn" disabled>Save Project</button>
+    <button id="btn-export" class="btn" disabled>Export WAV</button>
+    <input id="file-wav" type="file" accept="audio/wav,.wav" hidden>
+    <input id="file-project" type="file" accept="application/json,.json" hidden>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
