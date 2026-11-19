@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modular Playground</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="wordmark">Modular&nbsp;Playground</div>
+
+    <nav class="palette" id="palette" aria-label="Add module"></nav>
+
+    <div class="actions">
+      <select id="preset" aria-label="Load preset">
+        <option value="">Presets…</option>
+      </select>
+      <button id="new-patch" type="button">New</button>
+      <button id="import" type="button">Import</button>
+      <button id="export" type="button">Export</button>
+      <input id="import-file" type="file" accept=".json,application/json" hidden>
+      <button id="power" class="power" type="button" aria-pressed="false">Power</button>
+    </div>
+  </header>
+
+  <main class="workspace" id="workspace">
+    <svg class="cables" id="cables" aria-hidden="true"></svg>
+    <div class="modules" id="modules"></div>
+  </main>
+
+  <footer class="statusbar">
+    <span id="status">Press Power to start audio. Play notes with A–K (W, E, T, Y, U for sharps).</span>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

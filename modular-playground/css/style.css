@@ -1,0 +1,310 @@
+/* Modular Playground — base styles
+   Flat and geometric, in the spirit of Ableton Live's devices: gray
+   panels, thin title bars, arc knobs with numeric readouts, no shadows or
+   textures. Port and cable colors encode the signal kind. */
+
+:root {
+  --bg: #1c1c1c;
+  --grid: #242424;
+  --bar: #2a2a2a;
+  --panel: #3a3a3a;
+  --panel-title: #4a4a4a;
+  --line: #141414;
+  --ink: #d6d6d6;
+  --ink-dim: #8c8c8c;
+  --control: #262626;
+  --accent: #ff9a2e;
+  --accent-ink: #1c1c1c;
+  --danger: #ff6b5e;
+
+  --sig-audio: #ffb547;
+  --sig-pitch: #5fb8ff;
+  --sig-gate: #ff6b8b;
+  --sig-cv: #8fdc6a;
+  --sig-draft: #d6d6d6;
+
+  --font-ui: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 1.3;
+  overflow: hidden;
+  user-select: none;
+}
+
+.mono { font-family: var(--font-mono); }
+
+button, select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--control);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+button:hover, select:hover { border-color: var(--ink-dim); }
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 12px;
+  background: var(--bar);
+  border-bottom: 1px solid var(--line);
+}
+
+.wordmark {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+.palette button::before { content: "+ "; color: var(--ink-dim); }
+
+.actions { display: flex; gap: 4px; }
+
+.power[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ---------- workspace ---------- */
+
+.workspace {
+  position: relative;
+  overflow: auto;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-attachment: local;
+}
+
+.modules, .cables {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.cables {
+  z-index: 2; /* cables over modules */
+  pointer-events: none;
+  overflow: visible;
+}
+
+.cable-line {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.7; /* cables run over the modules: keep labels readable */
+}
+
+.cable-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 10;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.cable:hover .cable-line { stroke-width: 4; opacity: 1; }
+.cable-draft .cable-line { stroke-dasharray: 4 4; }
+
+.cable[data-signal="audio"] .cable-line { stroke: var(--sig-audio); }
+.cable[data-signal="pitch"] .cable-line { stroke: var(--sig-pitch); }
+.cable[data-signal="gate"] .cable-line { stroke: var(--sig-gate); }
+.cable[data-signal="cv"] .cable-line { stroke: var(--sig-cv); }
+.cable[data-signal="draft"] .cable-line { stroke: var(--sig-draft); }
+
+/* ---------- module ---------- */
+
+.module {
+  position: absolute;
+  min-width: 120px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.module-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20px;
+  padding: 0 4px 0 8px;
+  background: var(--panel-title);
+  font-weight: 600;
+  cursor: grab;
+}
+
+.module-title:active { cursor: grabbing; }
+
+.module-close {
+  border: none;
+  background: none;
+  padding: 0 4px;
+  color: var(--ink-dim);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.module-close:hover { color: var(--danger); }
+
+.module-body {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.module-center { padding: 0 2px; }
+
+.ports {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.port {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-dim);
+  font-size: 11px;
+}
+
+.ports-in .port { margin-left: -6px; }
+.ports-out .port { flex-direction: row-reverse; margin-right: -6px; }
+
+.jack {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--jack-color);
+  background: var(--panel);
+  cursor: crosshair;
+  flex: none;
+  /* Above the cable layer (.modules and .module create no stacking
+     context), so a jack that already has a cable can start another. */
+  position: relative;
+  z-index: 3;
+}
+
+.jack:hover { background: var(--jack-color); }
+
+.port[data-signal="audio"] { --jack-color: var(--sig-audio); }
+.port[data-signal="pitch"] { --jack-color: var(--sig-pitch); }
+.port[data-signal="gate"] { --jack-color: var(--sig-gate); }
+.port[data-signal="cv"] { --jack-color: var(--sig-cv); }
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), 64px);
+  gap: 6px 4px;
+}
+
+.knob, .choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.knob-label {
+  font-size: 10px;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+.knob-dial {
+  width: 34px;
+  height: 34px;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.knob-track, .knob-value {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: butt;
+}
+
+.knob-track { stroke: var(--control); }
+.knob-value { stroke: var(--accent); }
+.knob-needle { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+
+.knob-amount .knob-value { stroke: var(--sig-cv); }
+.knob-amount .knob-label { font-style: italic; }
+
+.knob-readout {
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.choice-select {
+  width: 64px;
+  margin-top: 2px;
+  padding: 2px;
+  font-size: 10px;
+}
+
+.toggle { display: flex; justify-content: center; }
+
+.toggle-button {
+  width: 34px;
+  padding: 2px 0;
+  font-size: 10px;
+  color: var(--ink-dim);
+}
+
+.toggle-button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.scope-canvas {
+  display: block;
+  width: 180px;
+  height: 70px;
+  margin-bottom: 6px;
+  background: var(--control);
+  --scope-grid: var(--panel-title);
+  --scope-trace: var(--sig-audio);
+}
+
+/* ---------- status bar ---------- */
+
+.statusbar {
+  padding: 4px 12px;
+  background: var(--bar);
+  border-top: 1px solid var(--line);
+  color: var(--ink-dim);
+}
